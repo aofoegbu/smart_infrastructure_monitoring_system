@@ -1,0 +1,26 @@
+asset_id,asset_type,name,latitude,longitude,installation_year,capacity,material,condition,last_inspection,next_maintenance
+ASSET_001,Pipeline,Pipeline 1,40.7589,-74.0023,2018,2500,Steel,Good,2023-06-15,2023-09-15
+ASSET_002,Pump Station,Pump Station 1,40.7234,-74.0156,2015,1800,Concrete,Excellent,2023-07-01,2023-10-01
+ASSET_003,Treatment Plant,Treatment Plant 1,40.7489,-74.0012,2010,5000,Concrete,Good,2023-05-20,2023-08-20
+ASSET_004,Storage Tank,Storage Tank 1,40.7628,-73.9876,2020,3000,Steel,Excellent,2023-06-30,2023-09-30
+ASSET_005,Valve,Valve 1,40.7445,-74.0089,2019,500,Cast Iron,Fair,2023-07-10,2023-10-10
+ASSET_006,Meter,Meter 1,40.7723,-73.9834,2021,200,PVC,Good,2023-06-05,2023-09-05
+ASSET_007,Pipeline,Pipeline 2,40.7567,-73.9945,2017,3200,Steel,Good,2023-06-25,2023-09-25
+ASSET_008,Pump Station,Pump Station 2,40.7612,-74.0034,2016,2100,Concrete,Fair,2023-07-05,2023-10-05
+ASSET_009,Treatment Plant,Treatment Plant 2,40.7389,-73.9923,2012,4500,Concrete,Good,2023-05-15,2023-08-15
+ASSET_010,Storage Tank,Storage Tank 2,40.7501,-74.0001,2019,2800,Steel,Excellent,2023-07-12,2023-10-12
+ASSET_011,Valve,Valve 2,40.7345,-73.9901,2020,450,Cast Iron,Good,2023-06-20,2023-09-20
+ASSET_012,Meter,Meter 2,40.7526,-74.0134,2022,180,PVC,Excellent,2023-07-08,2023-10-08
+ASSET_013,Pipeline,Pipeline 3,40.7640,-73.9865,2018,2900,Steel,Fair,2023-06-18,2023-09-18
+ASSET_014,Pump Station,Pump Station 3,40.7434,-74.0078,2014,1950,Concrete,Good,2023-07-02,2023-10-02
+ASSET_015,Treatment Plant,Treatment Plant 3,40.7734,-73.9823,2011,4200,Concrete,Fair,2023-05-25,2023-08-25
+ASSET_016,Storage Tank,Storage Tank 3,40.7223,-74.0145,2021,3500,Steel,Excellent,2023-06-22,2023-09-22
+ASSET_017,Valve,Valve 3,40.7556,-73.9934,2018,600,Cast Iron,Good,2023-07-15,2023-10-15
+ASSET_018,Meter,Meter 3,40.7601,-74.0023,2020,220,PVC,Good,2023-05-28,2023-08-28
+ASSET_019,Pipeline,Pipeline 4,40.7378,-73.9912,2019,2700,Steel,Excellent,2023-06-27,2023-09-27
+ASSET_020,Pump Station,Pump Station 4,40.7512,-74.0023,2017,2300,Concrete,Good,2023-07-03,2023-10-03
+ASSET_021,Treatment Plant,Treatment Plant 4,40.7367,-73.9889,2013,3800,Concrete,Good,2023-06-10,2023-09-10
+ASSET_022,Storage Tank,Storage Tank 4,40.7503,-74.0112,2022,4000,Steel,Excellent,2023-07-07,2023-10-07
+ASSET_023,Valve,Valve 4,40.7651,-73.9854,2021,520,Cast Iron,Excellent,2023-06-24,2023-09-24
+ASSET_024,Meter,Meter 4,40.7456,-74.0067,2019,195,PVC,Fair,2023-07-11,2023-10-11
+ASSET_025,Pipeline,Pipeline 5,40.7745,-73.9812,2020,3100,Steel,Good,2023-07-14,2023-10-14

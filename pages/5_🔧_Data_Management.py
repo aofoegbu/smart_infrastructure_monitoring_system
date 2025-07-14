@@ -1,0 +1,595 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np
+from datetime import datetime, timedelta
+import hashlib
+import json
+from utils.auth import check_authentication
+from utils.data_governance import DataGovernance, DataCatalog, AccessControl
+from utils.data_quality import DataQualityChecker, generate_quality_report
+from utils.data_generator import generate_real_time_data
+
+# Authentication check
+if not check_authentication():
+    st.stop()
+
+st.title("🔧 Data Management")
+st.markdown("Comprehensive data governance, quality management, and compliance dashboard")
+
+# Initialize data governance components
+dg = DataGovernance()
+dc = DataCatalog()
+ac = AccessControl()
+dqc = DataQualityChecker()
+
+# Main navigation tabs
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "📊 Data Overview", 
+    "🏛️ Data Governance", 
+    "✅ Data Quality", 
+    "🔐 Access Control", 
+    "📋 Compliance"
+])
+
+with tab1:
+    st.markdown("### Data Overview")
+    
+    # Data inventory
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Total Datasets", "24", "↑ 2")
+    
+    with col2:
+        st.metric("Active Sensors", "247", "↑ 3")
+    
+    with col3:
+        st.metric("Data Volume (GB)", "1,234.5", "↑ 45.2")
+    
+    with col4:
+        st.metric("Quality Score", "94.2%", "↑ 1.1%")
+    
+    # Data catalog table
+    st.markdown("### Data Catalog")
+    
+    catalog_data = pd.DataFrame({
+        'Dataset': ['sensor_readings', 'infrastructure_assets', 'maintenance_logs', 'user_activities', 'alerts_history'],
+        'Type': ['Time Series', 'Master Data', 'Transactional', 'Audit', 'Event'],
+        'Size (MB)': [856.3, 12.4, 234.7, 45.2, 89.1],
+        'Records': [2453621, 1247, 8945, 12453, 3421],
+        'Last Updated': ['2 mins ago', '1 hour ago', '15 mins ago', '5 mins ago', '30 mins ago'],
+        'Quality Score': [96.2, 98.7, 92.1, 89.5, 94.8],
+        'Owner': ['Data Engineering', 'Infrastructure', 'Maintenance', 'Security', 'Operations']
+    })
+    
+    st.dataframe(catalog_data, use_container_width=True)
+    
+    # Data lineage visualization
+    st.markdown("### Data Lineage")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Data flow diagram
+        lineage_data = {
+            'Source': ['IoT Sensors', 'Manual Entry', 'External APIs', 'Batch Import'],
+            'Processing': ['Data Ingestion', 'Data Validation', 'Data Transformation', 'Data Storage'],
+            'Destination': ['Analytics DB', 'Data Warehouse', 'ML Models', 'Dashboards']
+        }
+        
+        fig_lineage = go.Figure()
+        
+        # Add source nodes
+        for i, source in enumerate(lineage_data['Source']):
+            fig_lineage.add_trace(go.Scatter(
+                x=[0], y=[i], mode='markers+text', 
+                text=[source], textposition='middle right',
+                marker=dict(size=20, color='lightblue'),
+                showlegend=False
+            ))
+        
+        # Add processing nodes
+        for i, process in enumerate(lineage_data['Processing']):
+            fig_lineage.add_trace(go.Scatter(
+                x=[1], y=[i], mode='markers+text',
+                text=[process], textposition='middle center',
+                marker=dict(size=20, color='lightgreen'),
+                showlegend=False
+            ))
+        
+        # Add destination nodes
+        for i, dest in enumerate(lineage_data['Destination']):
+            fig_lineage.add_trace(go.Scatter(
+                x=[2], y=[i], mode='markers+text',
+                text=[dest], textposition='middle left',
+                marker=dict(size=20, color='lightcoral'),
+                showlegend=False
+            ))
+        
+        fig_lineage.update_layout(
+            title="Data Lineage Flow",
+            showlegend=False,
+            xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
+            yaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
+            height=400
+        )
+        
+        st.plotly_chart(fig_lineage, use_container_width=True)
+    
+    with col2:
+        # Data usage statistics
+        usage_data = pd.DataFrame({
+            'Department': ['Operations', 'Maintenance', 'Analytics', 'Quality', 'Management'],
+            'Usage (GB)': [345.2, 234.1, 456.8, 123.4, 89.3],
+            'Queries': [1245, 892, 2341, 567, 234]
+        })
+        
+        fig_usage = px.bar(
+            usage_data,
+            x='Department',
+            y='Usage (GB)',
+            title="Data Usage by Department",
+            color='Usage (GB)',
+            color_continuous_scale='Blues'
+        )
+        st.plotly_chart(fig_usage, use_container_width=True)
+
+with tab2:
+    st.markdown("### Data Governance Framework")
+    
+    # Governance policies
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Active Policies**")
+        
+        policies = pd.DataFrame({
+            'Policy': ['Data Retention', 'Data Classification', 'Access Control', 'Data Privacy', 'Backup & Recovery'],
+            'Status': ['Active', 'Active', 'Active', 'Under Review', 'Active'],
+            'Last Updated': ['2023-06-15', '2023-07-01', '2023-06-20', '2023-07-10', '2023-06-10'],
+            'Compliance': [98, 96, 99, 94, 97]
+        })
+        
+        st.dataframe(policies, use_container_width=True)
+    
+    with col2:
+        # Policy compliance chart
+        fig_compliance = px.bar(
+            policies,
+            x='Policy',
+            y='Compliance',
+            title="Policy Compliance Scores",
+            color='Compliance',
+            color_continuous_scale='RdYlGn'
+        )
+        fig_compliance.update_layout(height=300)
+        st.plotly_chart(fig_compliance, use_container_width=True)
+    
+    # Data stewardship
+    st.markdown("### Data Stewardship")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("**Data Stewards**")
+        stewards = pd.DataFrame({
+            'Name': ['Alice Johnson', 'Bob Smith', 'Carol Brown', 'David Wilson'],
+            'Department': ['Engineering', 'Operations', 'Quality', 'Security'],
+            'Responsibility': ['Sensor Data', 'Infrastructure', 'Quality Metrics', 'Access Logs'],
+            'Contact': ['alice@company.com', 'bob@company.com', 'carol@company.com', 'david@company.com']
+        })
+        st.dataframe(stewards, use_container_width=True)
+    
+    with col2:
+        st.markdown("**Data Classification**")
+        classification = pd.DataFrame({
+            'Classification': ['Public', 'Internal', 'Confidential', 'Restricted'],
+            'Count': [5, 12, 6, 1],
+            'Percentage': [20.8, 50.0, 25.0, 4.2]
+        })
+        
+        fig_class = px.pie(
+            classification,
+            values='Count',
+            names='Classification',
+            title="Data Classification Distribution"
+        )
+        fig_class.update_layout(height=300)
+        st.plotly_chart(fig_class, use_container_width=True)
+    
+    with col3:
+        st.markdown("**Metadata Management**")
+        metadata_stats = pd.DataFrame({
+            'Metric': ['Schema Compliance', 'Documentation Coverage', 'Lineage Tracking', 'Tag Completeness'],
+            'Score': [96, 89, 92, 87]
+        })
+        
+        for _, row in metadata_stats.iterrows():
+            st.metric(row['Metric'], f"{row['Score']}%")
+    
+    # Data lifecycle management
+    st.markdown("### Data Lifecycle Management")
+    
+    lifecycle_data = pd.DataFrame({
+        'Stage': ['Creation', 'Storage', 'Processing', 'Analysis', 'Archive', 'Deletion'],
+        'Data Volume (%)': [100, 95, 80, 60, 30, 0],
+        'Retention (Days)': [0, 30, 90, 365, 2555, 2920]
+    })
+    
+    fig_lifecycle = px.line(
+        lifecycle_data,
+        x='Retention (Days)',
+        y='Data Volume (%)',
+        title="Data Lifecycle - Volume Retention",
+        markers=True
+    )
+    
+    # Add stage annotations
+    for _, row in lifecycle_data.iterrows():
+        fig_lifecycle.add_annotation(
+            x=row['Retention (Days)'],
+            y=row['Data Volume (%)'],
+            text=row['Stage'],
+            showarrow=True,
+            arrowhead=2
+        )
+    
+    st.plotly_chart(fig_lifecycle, use_container_width=True)
+
+with tab3:
+    st.markdown("### Data Quality Management")
+    
+    # Generate sample data for quality analysis
+    sample_data = generate_real_time_data(1000)
+    
+    # Data quality summary
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        completeness = (1 - sample_data.isnull().sum().sum() / (len(sample_data) * len(sample_data.columns))) * 100
+        st.metric("Completeness", f"{completeness:.1f}%", "↑ 2.1%")
+    
+    with col2:
+        # Accuracy (simulate based on anomaly scores)
+        accuracy = (1 - sample_data['anomaly_score'].mean()) * 100
+        st.metric("Accuracy", f"{accuracy:.1f}%", "↑ 0.8%")
+    
+    with col3:
+        # Consistency (simulate)
+        consistency = np.random.uniform(92, 98)
+        st.metric("Consistency", f"{consistency:.1f}%", "↓ 0.3%")
+    
+    with col4:
+        # Timeliness (simulate)
+        timeliness = np.random.uniform(95, 99)
+        st.metric("Timeliness", f"{timeliness:.1f}%", "↑ 1.5%")
+    
+    # Quality rules and checks
+    st.markdown("### Quality Rules & Checks")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Active Quality Rules**")
+        
+        quality_rules = pd.DataFrame({
+            'Rule': ['Pressure Range Check', 'Flow Rate Validation', 'Temperature Bounds', 'Sensor ID Format', 'Timestamp Sequence'],
+            'Type': ['Range', 'Business', 'Range', 'Format', 'Sequence'],
+            'Status': ['Active', 'Active', 'Active', 'Active', 'Active'],
+            'Pass Rate (%)': [98.5, 96.2, 99.1, 100.0, 97.8],
+            'Failures': [15, 38, 9, 0, 22]
+        })
+        
+        st.dataframe(quality_rules, use_container_width=True)
+    
+    with col2:
+        # Quality trend chart
+        dates = pd.date_range(start='2023-06-01', end='2023-07-15', freq='D')
+        quality_trend = pd.DataFrame({
+            'Date': dates,
+            'Overall Quality': np.random.uniform(92, 98, len(dates)),
+            'Completeness': np.random.uniform(95, 99, len(dates)),
+            'Accuracy': np.random.uniform(90, 96, len(dates))
+        })
+        
+        fig_trend = px.line(
+            quality_trend.melt(id_vars=['Date'], var_name='Metric', value_name='Score'),
+            x='Date',
+            y='Score',
+            color='Metric',
+            title="Data Quality Trends"
+        )
+        st.plotly_chart(fig_trend, use_container_width=True)
+    
+    # Data profiling
+    st.markdown("### Data Profiling")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Null value analysis
+        null_analysis = sample_data.isnull().sum().reset_index()
+        null_analysis.columns = ['Column', 'Null_Count']
+        null_analysis['Null_Percentage'] = (null_analysis['Null_Count'] / len(sample_data)) * 100
+        
+        fig_nulls = px.bar(
+            null_analysis,
+            x='Column',
+            y='Null_Percentage',
+            title="Null Value Analysis"
+        )
+        st.plotly_chart(fig_nulls, use_container_width=True)
+    
+    with col2:
+        # Data distribution analysis
+        numeric_cols = ['pressure', 'flow_rate', 'temperature']
+        selected_col = st.selectbox("Select Column for Distribution", numeric_cols)
+        
+        fig_dist = px.histogram(
+            sample_data,
+            x=selected_col,
+            title=f"{selected_col.title()} Distribution",
+            nbins=30
+        )
+        st.plotly_chart(fig_dist, use_container_width=True)
+    
+    # Quality report generation
+    st.markdown("### Quality Report Generation")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("📊 Generate Quality Report"):
+            report = generate_quality_report(sample_data)
+            st.success("Quality report generated successfully!")
+            
+            with st.expander("View Report Summary"):
+                st.json(report)
+    
+    with col2:
+        if st.button("🔍 Run Quality Checks"):
+            st.info("Running comprehensive quality checks...")
+            
+            # Simulate quality check results
+            checks = {
+                'Null Check': 'PASSED',
+                'Range Check': 'PASSED', 
+                'Format Check': 'PASSED',
+                'Uniqueness Check': 'WARNING',
+                'Referential Integrity': 'FAILED'
+            }
+            
+            for check, status in checks.items():
+                if status == 'PASSED':
+                    st.success(f"✅ {check}: {status}")
+                elif status == 'WARNING':
+                    st.warning(f"⚠️ {check}: {status}")
+                else:
+                    st.error(f"❌ {check}: {status}")
+    
+    with col3:
+        if st.button("📧 Schedule Quality Alerts"):
+            st.info("Quality monitoring alerts configured")
+
+with tab4:
+    st.markdown("### Access Control Management")
+    
+    # User access overview
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("Active Users", "42", "↑ 3")
+    
+    with col2:
+        st.metric("User Groups", "8", "→ 0")
+    
+    with col3:
+        st.metric("Access Violations", "2", "↓ 5")
+    
+    # User management
+    st.markdown("### User Access Management")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Active Users**")
+        
+        users_data = pd.DataFrame({
+            'User': ['john.doe', 'jane.smith', 'mike.wilson', 'sarah.jones', 'admin'],
+            'Role': ['Operator', 'Analyst', 'Manager', 'Analyst', 'Administrator'],
+            'Department': ['Operations', 'Analytics', 'Management', 'Analytics', 'IT'],
+            'Last Login': ['2023-07-15 09:30', '2023-07-15 08:45', '2023-07-14 16:20', '2023-07-15 10:15', '2023-07-15 07:00'],
+            'Status': ['Active', 'Active', 'Active', 'Active', 'Active']
+        })
+        
+        st.dataframe(users_data, use_container_width=True)
+    
+    with col2:
+        # Role distribution
+        role_counts = users_data['Role'].value_counts()
+        fig_roles = px.pie(
+            values=role_counts.values,
+            names=role_counts.index,
+            title="User Role Distribution"
+        )
+        st.plotly_chart(fig_roles, use_container_width=True)
+    
+    # Permission matrix
+    st.markdown("### Permission Matrix")
+    
+    permissions_data = pd.DataFrame({
+        'Resource': ['Sensor Data', 'Infrastructure Assets', 'Maintenance Logs', 'User Management', 'System Config'],
+        'Administrator': ['Full', 'Full', 'Full', 'Full', 'Full'],
+        'Manager': ['Read/Write', 'Read/Write', 'Read/Write', 'Read', 'Read'],
+        'Analyst': ['Read/Write', 'Read', 'Read', 'None', 'None'],
+        'Operator': ['Read', 'Read', 'Read/Write', 'None', 'None']
+    })
+    
+    # Create color mapping for permissions
+    def color_permissions(val):
+        if val == 'Full':
+            return 'background-color: #90EE90'
+        elif val == 'Read/Write':
+            return 'background-color: #FFE4B5'
+        elif val == 'Read':
+            return 'background-color: #E0E0E0'
+        else:
+            return 'background-color: #FFB6C1'
+    
+    st.dataframe(
+        permissions_data.style.applymap(color_permissions, subset=['Administrator', 'Manager', 'Analyst', 'Operator']),
+        use_container_width=True
+    )
+    
+    # Access audit
+    st.markdown("### Access Audit Trail")
+    
+    audit_data = pd.DataFrame({
+        'Timestamp': ['2023-07-15 10:30:00', '2023-07-15 10:25:00', '2023-07-15 10:20:00', '2023-07-15 10:15:00'],
+        'User': ['jane.smith', 'john.doe', 'mike.wilson', 'sarah.jones'],
+        'Action': ['READ', 'WRITE', 'READ', 'DELETE'],
+        'Resource': ['sensor_data', 'maintenance_logs', 'infrastructure_assets', 'old_alerts'],
+        'Result': ['SUCCESS', 'SUCCESS', 'SUCCESS', 'DENIED'],
+        'IP Address': ['192.168.1.101', '192.168.1.102', '192.168.1.103', '192.168.1.104']
+    })
+    
+    st.dataframe(audit_data, use_container_width=True)
+
+with tab5:
+    st.markdown("### Compliance Dashboard")
+    
+    # Compliance overview
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("GDPR Compliance", "96%", "↑ 2%")
+    
+    with col2:
+        st.metric("ISO 27001", "94%", "→ 0%")
+    
+    with col3:
+        st.metric("SOX Compliance", "98%", "↑ 1%")
+    
+    with col4:
+        st.metric("Industry Standards", "92%", "↓ 1%")
+    
+    # Compliance requirements
+    st.markdown("### Compliance Requirements")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        compliance_reqs = pd.DataFrame({
+            'Requirement': ['Data Encryption', 'Access Logging', 'Data Retention', 'Privacy Controls', 'Backup & Recovery'],
+            'Standard': ['ISO 27001', 'SOX', 'GDPR', 'GDPR', 'ISO 27001'],
+            'Status': ['Compliant', 'Compliant', 'Compliant', 'Partial', 'Compliant'],
+            'Last Audit': ['2023-06-15', '2023-07-01', '2023-06-20', '2023-07-10', '2023-06-10'],
+            'Next Review': ['2023-12-15', '2024-01-01', '2023-12-20', '2023-10-10', '2023-12-10']
+        })
+        
+        st.dataframe(compliance_reqs, use_container_width=True)
+    
+    with col2:
+        # Compliance status chart
+        status_counts = compliance_reqs['Status'].value_counts()
+        fig_compliance_status = px.pie(
+            values=status_counts.values,
+            names=status_counts.index,
+            title="Compliance Status Distribution",
+            color_discrete_map={'Compliant': 'green', 'Partial': 'orange', 'Non-Compliant': 'red'}
+        )
+        st.plotly_chart(fig_compliance_status, use_container_width=True)
+    
+    # Data privacy management
+    st.markdown("### Data Privacy Management")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Privacy Controls**")
+        
+        privacy_controls = pd.DataFrame({
+            'Control': ['Data Anonymization', 'Consent Management', 'Right to Erasure', 'Data Portability', 'Breach Notification'],
+            'Implementation': ['Implemented', 'Implemented', 'Implemented', 'Partial', 'Implemented'],
+            'Effectiveness': [95, 92, 88, 75, 98]
+        })
+        
+        st.dataframe(privacy_controls, use_container_width=True)
+    
+    with col2:
+        # Privacy effectiveness chart
+        fig_privacy = px.bar(
+            privacy_controls,
+            x='Control',
+            y='Effectiveness',
+            title="Privacy Control Effectiveness",
+            color='Effectiveness',
+            color_continuous_scale='RdYlGn'
+        )
+        fig_privacy.update_layout(height=300, xaxis={'tickangle': 45})
+        st.plotly_chart(fig_privacy, use_container_width=True)
+    
+    # Compliance reporting
+    st.markdown("### Compliance Reporting")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("📊 Generate Compliance Report"):
+            st.success("Compliance report generated successfully!")
+            
+            # Simulate report generation
+            report_data = {
+                "report_id": "COMP-2023-07-15-001",
+                "generated_at": datetime.now().isoformat(),
+                "compliance_score": 94.5,
+                "requirements_total": 25,
+                "requirements_met": 23,
+                "requirements_partial": 2,
+                "requirements_failed": 0
+            }
+            
+            with st.expander("View Report Details"):
+                st.json(report_data)
+    
+    with col2:
+        if st.button("📧 Schedule Compliance Alerts"):
+            st.info("Compliance monitoring alerts configured")
+    
+    with col3:
+        if st.button("🔍 Run Compliance Audit"):
+            st.info("Comprehensive compliance audit initiated")
+
+# Export and actions
+st.markdown("---")
+st.markdown("### Export & Actions")
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    if st.button("📥 Export Data Catalog"):
+        csv = catalog_data.to_csv(index=False)
+        st.download_button(
+            label="Download Catalog",
+            data=csv,
+            file_name=f"data_catalog_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+            mime="text/csv"
+        )
+
+with col2:
+    if st.button("🔧 Update Policies"):
+        st.info("Policy update interface would be implemented here")
+
+with col3:
+    if st.button("📊 Generate Full Report"):
+        st.info("Comprehensive data management report generation would be implemented here")
+
+with col4:
+    if st.button("⚙️ System Settings"):
+        with st.expander("System Configuration"):
+            st.checkbox("Enable Data Lineage Tracking")
+            st.checkbox("Auto Quality Checks")
+            st.selectbox("Retention Policy", ["30 days", "90 days", "1 year", "Custom"])
+            st.number_input("Max File Size (MB)", min_value=1, max_value=1000, value=100)

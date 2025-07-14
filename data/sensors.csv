@@ -1,0 +1,51 @@
+sensor_id,sensor_type,location,installation_date,maintenance_interval,manufacturer,model,status,calibration_date,latitude,longitude
+SENSOR_001,pressure,Water Treatment Plant A,2022-03-15,90,SensorTech,Model-145,Active,2023-06-20,40.7489,-74.0012
+SENSOR_002,flow,Distribution Center B,2021-08-22,60,AquaMonitor,Model-267,Active,2023-07-01,40.7356,-73.9912
+SENSOR_003,temperature,Pumping Station C,2023-01-10,30,TempSense,Model-189,Active,2023-06-15,40.7514,-74.0123
+SENSOR_004,quality,Reservoir D,2022-07-03,180,FlowControl,Model-334,Active,2023-05-30,40.7628,-73.9876
+SENSOR_005,pressure,Main Pipeline E,2021-11-18,90,SensorTech,Model-145,Active,2023-06-25,40.7445,-74.0089
+SENSOR_006,flow,Secondary Network F,2022-09-05,60,AquaMonitor,Model-267,Active,2023-07-10,40.7723,-73.9834
+SENSOR_007,temperature,Industrial Zone G,2023-02-28,30,TempSense,Model-189,Maintenance,2023-06-08,40.7234,-74.0156
+SENSOR_008,quality,Residential Area H,2022-05-12,180,FlowControl,Model-334,Active,2023-06-12,40.7567,-73.9945
+SENSOR_009,pressure,Commercial District I,2021-12-30,90,SensorTech,Model-145,Active,2023-07-05,40.7612,-74.0034
+SENSOR_010,flow,Emergency Backup J,2022-10-14,60,AquaMonitor,Model-267,Active,2023-06-28,40.7389,-73.9923
+SENSOR_011,temperature,Water Treatment Plant A,2023-03-20,30,TempSense,Model-189,Active,2023-07-12,40.7501,-74.0001
+SENSOR_012,quality,Distribution Center B,2022-06-08,180,FlowControl,Model-334,Active,2023-05-25,40.7345,-73.9901
+SENSOR_013,pressure,Pumping Station C,2021-09-17,90,SensorTech,Model-145,Active,2023-06-30,40.7526,-74.0134
+SENSOR_014,flow,Reservoir D,2022-11-25,60,AquaMonitor,Model-267,Active,2023-07-08,40.7640,-73.9865
+SENSOR_015,temperature,Main Pipeline E,2023-01-05,30,TempSense,Model-189,Active,2023-06-18,40.7434,-74.0078
+SENSOR_016,quality,Secondary Network F,2022-04-19,180,FlowControl,Model-334,Active,2023-06-05,40.7734,-73.9823
+SENSOR_017,pressure,Industrial Zone G,2021-07-11,90,SensorTech,Model-145,Active,2023-07-02,40.7223,-74.0145
+SENSOR_018,flow,Residential Area H,2022-12-03,60,AquaMonitor,Model-267,Active,2023-06-22,40.7556,-73.9934
+SENSOR_019,temperature,Commercial District I,2023-04-16,30,TempSense,Model-189,Active,2023-07-15,40.7601,-74.0023
+SENSOR_020,quality,Emergency Backup J,2022-08-29,180,FlowControl,Model-334,Active,2023-05-28,40.7378,-73.9912
+SENSOR_021,pressure,Water Treatment Plant A,2021-10-06,90,SensorTech,Model-145,Active,2023-06-27,40.7512,-74.0023
+SENSOR_022,flow,Distribution Center B,2022-01-21,60,AquaMonitor,Model-267,Active,2023-07-03,40.7367,-73.9889
+SENSOR_023,temperature,Pumping Station C,2023-05-14,30,TempSense,Model-189,Active,2023-06-10,40.7503,-74.0112
+SENSOR_024,quality,Reservoir D,2022-02-07,180,FlowControl,Model-334,Active,2023-07-07,40.7651,-73.9854
+SENSOR_025,pressure,Main Pipeline E,2021-06-23,90,SensorTech,Model-145,Active,2023-06-24,40.7456,-74.0067
+SENSOR_026,flow,Secondary Network F,2022-03-18,60,AquaMonitor,Model-267,Active,2023-07-11,40.7745,-73.9812
+SENSOR_027,temperature,Industrial Zone G,2023-07-02,30,TempSense,Model-189,Active,2023-07-14,40.7212,-74.0134
+SENSOR_028,quality,Residential Area H,2022-09-15,180,FlowControl,Model-334,Active,2023-05-22,40.7545,-73.9923
+SENSOR_029,pressure,Commercial District I,2021-11-08,90,SensorTech,Model-145,Active,2023-06-29,40.7589,-74.0012
+SENSOR_030,flow,Emergency Backup J,2022-04-26,60,AquaMonitor,Model-267,Active,2023-07-06,40.7367,-73.9901
+SENSOR_031,temperature,Water Treatment Plant A,2023-02-11,30,TempSense,Model-189,Active,2023-06-16,40.7523,-74.0034
+SENSOR_032,quality,Distribution Center B,2022-07-30,180,FlowControl,Model-334,Active,2023-06-03,40.7378,-73.9878
+SENSOR_033,pressure,Pumping Station C,2021-12-14,90,SensorTech,Model-145,Active,2023-07-01,40.7489,-74.0101
+SENSOR_034,flow,Reservoir D,2022-05-09,60,AquaMonitor,Model-267,Active,2023-06-26,40.7662,-73.9843
+SENSOR_035,temperature,Main Pipeline E,2023-06-22,30,TempSense,Model-189,Active,2023-07-13,40.7467,-74.0056
+SENSOR_036,quality,Secondary Network F,2022-10-05,180,FlowControl,Model-334,Active,2023-05-20,40.7756,-73.9801
+SENSOR_037,pressure,Industrial Zone G,2021-08-31,90,SensorTech,Model-145,Active,2023-06-21,40.7201,-74.0123
+SENSOR_038,flow,Residential Area H,2022-01-17,60,AquaMonitor,Model-267,Active,2023-07-04,40.7534,-73.9912
+SENSOR_039,temperature,Commercial District I,2023-03-06,30,TempSense,Model-189,Active,2023-06-14,40.7578,-74.0001
+SENSOR_040,quality,Emergency Backup J,2022-06-12,180,FlowControl,Model-334,Active,2023-06-08,40.7356,-73.9890
+SENSOR_041,pressure,Water Treatment Plant A,2021-09-28,90,SensorTech,Model-145,Active,2023-06-23,40.7534,-74.0045
+SENSOR_042,flow,Distribution Center B,2022-02-13,60,AquaMonitor,Model-267,Active,2023-07-09,40.7389,-73.9867
+SENSOR_043,temperature,Pumping Station C,2023-04-09,30,TempSense,Model-189,Active,2023-06-11,40.7456,-74.0090
+SENSOR_044,quality,Reservoir D,2022-08-25,180,FlowControl,Model-334,Active,2023-05-26,40.7673,-73.9832
+SENSOR_045,pressure,Main Pipeline E,2021-05-18,90,SensorTech,Model-145,Active,2023-06-19,40.7478,-74.0045
+SENSOR_046,flow,Secondary Network F,2022-11-01,60,AquaMonitor,Model-267,Active,2023-07-12,40.7767,-73.9790
+SENSOR_047,temperature,Industrial Zone G,2023-01-24,30,TempSense,Model-189,Active,2023-06-17,40.7190,-74.0112
+SENSOR_048,quality,Residential Area H,2022-03-07,180,FlowControl,Model-334,Active,2023-06-04,40.7523,-73.9901
+SENSOR_049,pressure,Commercial District I,2021-07-13,90,SensorTech,Model-145,Active,2023-07-14,40.7567,-73.9990
+SENSOR_050,flow,Emergency Backup J,2022-12-20,60,AquaMonitor,Model-267,Active,2023-06-09,40.7345,-73.9879
