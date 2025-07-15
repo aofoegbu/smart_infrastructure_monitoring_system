@@ -7,6 +7,10 @@
 
 A comprehensive enterprise-grade Smart Infrastructure Monitoring System built with Python, featuring real-time sensor monitoring, AI-powered anomaly detection, and advanced data governance for utility networks.
 
+https://smart-infra-monitor-augustineogelo.replit.app/Home
+
+![Smart Infrastructure Monitoring System](screenshots/monitoring_system.png)
+
 ## 🚀 Quick Start
 
 ### Prerequisites
