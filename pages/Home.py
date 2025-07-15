@@ -120,15 +120,15 @@ with col1:
 
 with col2:
     if st.button("🚨 View Alerts", use_container_width=True):
-        st.switch_page("pages/4_🚨_Anomaly_Detection.py")
+        st.switch_page("pages/Anomaly_Detection.py")
 
 with col3:
     if st.button("🗺️ Infrastructure Map", use_container_width=True):
-        st.switch_page("pages/2_🗺️_Infrastructure_Map.py")
+        st.switch_page("pages/Infrastructure_Map.py")
 
 with col4:
     if st.button("📈 Analytics", use_container_width=True):
-        st.switch_page("pages/3_📈_Analytics_Hub.py")
+        st.switch_page("pages/Analytics_Hub.py")
 
 # Recent activity summary
 st.markdown("### Recent Activity")

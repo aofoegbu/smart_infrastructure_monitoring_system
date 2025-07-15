@@ -9,4 +9,4 @@ st.set_page_config(
 )
 
 # Redirect to Home page
-st.switch_page("pages/0_🏠_Home.py")
+st.switch_page("pages/Home.py")
