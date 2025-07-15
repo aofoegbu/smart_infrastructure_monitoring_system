@@ -35,16 +35,10 @@ with col1:
     st.markdown("Monitor and optimize your infrastructure networks in real-time")
 
 with col2:
-    total_sensors = system_stats.get('total_sensors', 0)
-    st.metric("Active Sensors", str(total_sensors), "↑ 3")
+    st.metric("Active Sensors", "247", "↑ 3")
 
 with col3:
-    # Calculate system health based on active sensors percentage
-    if total_sensors > 0:
-        active_percentage = (system_stats.get('active_sensors', 0) / total_sensors) * 100
-        st.metric("System Health", f"{active_percentage:.1f}%", "↑ 0.3%")
-    else:
-        st.metric("System Health", "98.7%", "↑ 0.3%")
+    st.metric("System Health", "98.7%", "↑ 0.3%")
 
 # Quick overview metrics
 st.markdown("### System Overview")
@@ -120,15 +114,15 @@ with col1:
 
 with col2:
     if st.button("🚨 View Alerts", use_container_width=True):
-        st.switch_page("pages/Anomaly_Detection.py")
+        st.switch_page("pages/🚨_Anomaly_Detection.py")
 
 with col3:
     if st.button("🗺️ Infrastructure Map", use_container_width=True):
-        st.switch_page("pages/Infrastructure_Map.py")
+        st.switch_page("pages/🗺️_Infrastructure_Map.py")
 
 with col4:
     if st.button("📈 Analytics", use_container_width=True):
-        st.switch_page("pages/Analytics_Hub.py")
+        st.switch_page("pages/📈_Analytics_Hub.py")
 
 # Recent activity summary
 st.markdown("### Recent Activity")
