@@ -546,20 +546,20 @@ with col2:
         with st.spinner("Generating comprehensive analytics report..."):
             # Get recent data for analysis
             from utils.data_generator import get_recent_sensor_data_from_db
-                from utils.database import get_system_stats, get_active_alerts
-                from utils.ml_models import calculate_sensor_health_score, predict_maintenance, detect_anomalies
-                from utils.data_quality import generate_quality_report
-                
-                recent_data = get_recent_sensor_data_from_db(hours=24)
-                system_stats = get_system_stats()
-                active_alerts = get_active_alerts()
-                
-                if not recent_data.empty:
-                    # Generate analytics
-                    health_scores = calculate_sensor_health_score(recent_data)
-                    maintenance_scores = predict_maintenance(recent_data)
-                    anomaly_scores = detect_anomalies(recent_data)
-                    quality_report = generate_quality_report(recent_data)
+            from utils.database import get_system_stats, get_active_alerts
+            from utils.ml_models import calculate_sensor_health_score, predict_maintenance, detect_anomalies
+            from utils.data_quality import generate_quality_report
+            
+            recent_data = get_recent_sensor_data_from_db(hours=24)
+            system_stats = get_system_stats()
+            active_alerts = get_active_alerts()
+            
+            if not recent_data.empty:
+                # Generate analytics
+                health_scores = calculate_sensor_health_score(recent_data)
+                maintenance_scores = predict_maintenance(recent_data)
+                anomaly_scores = detect_anomalies(recent_data)
+                quality_report = generate_quality_report(recent_data)
                     
                     # Create comprehensive report
                     report = {

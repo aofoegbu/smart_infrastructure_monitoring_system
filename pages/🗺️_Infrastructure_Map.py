@@ -337,33 +337,33 @@ with col3:
                 
                 # Define zones based on latitude/longitude ranges
                 zones = {
-                        'North': {'lat_min': base_lat + 0.02, 'lat_max': base_lat + 0.1, 'lon_min': base_lon - 0.1, 'lon_max': base_lon + 0.1},
-                        'South': {'lat_min': base_lat - 0.1, 'lat_max': base_lat - 0.02, 'lon_min': base_lon - 0.1, 'lon_max': base_lon + 0.1},
-                        'East': {'lat_min': base_lat - 0.02, 'lat_max': base_lat + 0.02, 'lon_min': base_lon + 0.02, 'lon_max': base_lon + 0.1},
-                        'West': {'lat_min': base_lat - 0.02, 'lat_max': base_lat + 0.02, 'lon_min': base_lon - 0.1, 'lon_max': base_lon - 0.02},
-                        'Central': {'lat_min': base_lat - 0.02, 'lat_max': base_lat + 0.02, 'lon_min': base_lon - 0.02, 'lon_max': base_lon + 0.02}
-                    }
+                    'North': {'lat_min': base_lat + 0.02, 'lat_max': base_lat + 0.1, 'lon_min': base_lon - 0.1, 'lon_max': base_lon + 0.1},
+                    'South': {'lat_min': base_lat - 0.1, 'lat_max': base_lat - 0.02, 'lon_min': base_lon - 0.1, 'lon_max': base_lon + 0.1},
+                    'East': {'lat_min': base_lat - 0.02, 'lat_max': base_lat + 0.02, 'lon_min': base_lon + 0.02, 'lon_max': base_lon + 0.1},
+                    'West': {'lat_min': base_lat - 0.02, 'lat_max': base_lat + 0.02, 'lon_min': base_lon - 0.1, 'lon_max': base_lon - 0.02},
+                    'Central': {'lat_min': base_lat - 0.02, 'lat_max': base_lat + 0.02, 'lon_min': base_lon - 0.02, 'lon_max': base_lon + 0.02}
+                }
+                
+                for zone_name, zone_bounds in zones.items():
+                    zone_sensors = sensors_df[
+                        (sensors_df['latitude'] >= zone_bounds['lat_min']) &
+                        (sensors_df['latitude'] <= zone_bounds['lat_max']) &
+                        (sensors_df['longitude'] >= zone_bounds['lon_min']) &
+                        (sensors_df['longitude'] <= zone_bounds['lon_max'])
+                    ]
                     
-                    for zone_name, zone_bounds in zones.items():
-                        zone_sensors = sensors_df[
-                            (sensors_df['latitude'] >= zone_bounds['lat_min']) &
-                            (sensors_df['latitude'] <= zone_bounds['lat_max']) &
-                            (sensors_df['longitude'] >= zone_bounds['lon_min']) &
-                            (sensors_df['longitude'] <= zone_bounds['lon_max'])
-                        ]
+                    if not zone_sensors.empty:
+                        zone_data = recent_data[recent_data['sensor_id'].isin(zone_sensors['sensor_id'])]
                         
-                        if not zone_sensors.empty:
-                            zone_data = recent_data[recent_data['sensor_id'].isin(zone_sensors['sensor_id'])]
-                            
-                            if not zone_data.empty:
-                                zone_analysis[zone_name] = {
-                                    'sensor_count': len(zone_sensors),
-                                    'avg_pressure': zone_data['pressure'].mean(),
-                                    'avg_flow': zone_data['flow_rate'].mean(),
-                                    'avg_temperature': zone_data['temperature'].mean(),
-                                    'avg_quality': zone_data['quality_score'].mean(),
-                                    'anomaly_count': len(zone_data[zone_data['anomaly_score'] > 0.7])
-                                }
+                        if not zone_data.empty:
+                            zone_analysis[zone_name] = {
+                                'sensor_count': len(zone_sensors),
+                                'avg_pressure': zone_data['pressure'].mean(),
+                                'avg_flow': zone_data['flow_rate'].mean(),
+                                'avg_temperature': zone_data['temperature'].mean(),
+                                'avg_quality': zone_data['quality_score'].mean(),
+                                'anomaly_count': len(zone_data[zone_data['anomaly_score'] > 0.7])
+                            }
                     
                     # Display zone analysis
                     st.subheader("📍 Zone Analysis Report")
