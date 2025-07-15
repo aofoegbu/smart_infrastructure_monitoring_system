@@ -287,8 +287,130 @@ with col1:
 
 with col2:
     if st.button("🗺️ Export Map Image"):
-        st.info("Map image export functionality would be implemented here")
+        # Map image export functionality
+        import base64
+        import io
+        from PIL import Image
+        
+        # Create a map export
+        export_map = folium.Map(
+            location=[base_lat, base_lon],
+            zoom_start=12,
+            tiles='OpenStreetMap'
+        )
+        
+        # Add all sensors to export map
+        for _, sensor in sensors_df.iterrows():
+            status_color = 'green' if sensor['status'] == 'Active' else 'red'
+            folium.CircleMarker(
+                location=[sensor['latitude'], sensor['longitude']],
+                radius=8,
+                popup=f"Sensor: {sensor['sensor_id']}<br>Type: {sensor['sensor_type']}<br>Status: {sensor['status']}",
+                color=status_color,
+                fill=True,
+                fillOpacity=0.7
+            ).add_to(export_map)
+        
+        # Save map as HTML and display download link
+        map_html = export_map._repr_html_()
+        b64_html = base64.b64encode(map_html.encode()).decode()
+        
+        st.download_button(
+            label="📁 Download Map (HTML)",
+            data=map_html,
+            file_name=f"infrastructure_map_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html",
+            mime='text/html'
+        )
+        st.success("Map export ready for download!")
 
 with col3:
     if st.button("📊 Generate Zone Report"):
-        st.info("Zone analysis report generation would be implemented here")
+        # Zone analysis report generation
+        with st.spinner("Analyzing zones..."):
+            # Analyze sensors by geographical zones
+            from utils.data_generator import get_recent_sensor_data_from_db
+            recent_data = get_recent_sensor_data_from_db(hours=24)
+            
+            if not recent_data.empty:
+                # Create zone analysis
+                zone_analysis = {}
+                
+                # Define zones based on latitude/longitude ranges
+                zones = {
+                        'North': {'lat_min': base_lat + 0.02, 'lat_max': base_lat + 0.1, 'lon_min': base_lon - 0.1, 'lon_max': base_lon + 0.1},
+                        'South': {'lat_min': base_lat - 0.1, 'lat_max': base_lat - 0.02, 'lon_min': base_lon - 0.1, 'lon_max': base_lon + 0.1},
+                        'East': {'lat_min': base_lat - 0.02, 'lat_max': base_lat + 0.02, 'lon_min': base_lon + 0.02, 'lon_max': base_lon + 0.1},
+                        'West': {'lat_min': base_lat - 0.02, 'lat_max': base_lat + 0.02, 'lon_min': base_lon - 0.1, 'lon_max': base_lon - 0.02},
+                        'Central': {'lat_min': base_lat - 0.02, 'lat_max': base_lat + 0.02, 'lon_min': base_lon - 0.02, 'lon_max': base_lon + 0.02}
+                    }
+                    
+                    for zone_name, zone_bounds in zones.items():
+                        zone_sensors = sensors_df[
+                            (sensors_df['latitude'] >= zone_bounds['lat_min']) &
+                            (sensors_df['latitude'] <= zone_bounds['lat_max']) &
+                            (sensors_df['longitude'] >= zone_bounds['lon_min']) &
+                            (sensors_df['longitude'] <= zone_bounds['lon_max'])
+                        ]
+                        
+                        if not zone_sensors.empty:
+                            zone_data = recent_data[recent_data['sensor_id'].isin(zone_sensors['sensor_id'])]
+                            
+                            if not zone_data.empty:
+                                zone_analysis[zone_name] = {
+                                    'sensor_count': len(zone_sensors),
+                                    'avg_pressure': zone_data['pressure'].mean(),
+                                    'avg_flow': zone_data['flow_rate'].mean(),
+                                    'avg_temperature': zone_data['temperature'].mean(),
+                                    'avg_quality': zone_data['quality_score'].mean(),
+                                    'anomaly_count': len(zone_data[zone_data['anomaly_score'] > 0.7])
+                                }
+                    
+                    # Display zone analysis
+                    st.subheader("📍 Zone Analysis Report")
+                    
+                    for zone_name, data in zone_analysis.items():
+                        with st.expander(f"🗺️ {zone_name} Zone Analysis"):
+                            col1, col2, col3 = st.columns(3)
+                            
+                            with col1:
+                                st.metric("Sensors", data['sensor_count'])
+                                st.metric("Avg Pressure", f"{data['avg_pressure']:.1f} PSI")
+                            
+                            with col2:
+                                st.metric("Avg Flow", f"{data['avg_flow']:.1f} L/min")
+                                st.metric("Avg Temperature", f"{data['avg_temperature']:.1f}°C")
+                            
+                            with col3:
+                                st.metric("Avg Quality", f"{data['avg_quality']:.1f}")
+                                st.metric("Anomalies", data['anomaly_count'])
+                    
+                    # Generate downloadable report
+                    report_data = []
+                    for zone_name, data in zone_analysis.items():
+                        report_data.append({
+                            'Zone': zone_name,
+                            'Sensors': data['sensor_count'],
+                            'Avg_Pressure_PSI': round(data['avg_pressure'], 2),
+                            'Avg_Flow_L_min': round(data['avg_flow'], 2),
+                            'Avg_Temperature_C': round(data['avg_temperature'], 2),
+                            'Avg_Quality_Score': round(data['avg_quality'], 2),
+                            'Anomaly_Count': data['anomaly_count']
+                        })
+                    
+                    import csv
+                    import io
+                    output = io.StringIO()
+                    writer = csv.DictWriter(output, fieldnames=report_data[0].keys())
+                    writer.writeheader()
+                    writer.writerows(report_data)
+                    
+                    st.download_button(
+                        label="📊 Download Zone Analysis Report (CSV)",
+                        data=output.getvalue(),
+                        file_name=f"zone_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                        mime='text/csv'
+                    )
+                    
+                    st.success("Zone analysis report generated successfully!")
+                else:
+                    st.warning("No recent sensor data available for zone analysis.")

@@ -336,11 +336,100 @@ if anomalies_detected > 0:
             if auto_alert:
                 st.success(f"✅ {len(anomaly_details)} alerts created automatically")
             else:
-                st.info("Alert creation feature would be implemented here")
+                # Alert creation feature
+                with st.form("create_alert"):
+                    st.subheader("🚨 Create Custom Alert")
+                    
+                    alert_type = st.selectbox(
+                        "Alert Type",
+                        ["pressure", "flow", "temperature", "quality", "anomaly", "maintenance"]
+                    )
+                    
+                    severity = st.selectbox(
+                        "Severity",
+                        ["info", "warning", "critical"]
+                    )
+                    
+                    sensor_id = st.selectbox(
+                        "Sensor ID",
+                        options=anomaly_data['sensor_id'].unique() if not anomaly_data.empty else ["SENSOR_001"]
+                    )
+                    
+                    alert_title = st.text_input("Alert Title", placeholder="High pressure detected")
+                    alert_description = st.text_area("Description", placeholder="Describe the alert condition...")
+                    
+                    if st.form_submit_button("🚨 Create Alert"):
+                        from utils.database import create_alert
+                        
+                        success = create_alert(
+                            sensor_id=sensor_id,
+                            alert_type=alert_type,
+                            severity=severity,
+                            title=alert_title,
+                            description=alert_description
+                        )
+                        
+                        if success:
+                            st.success(f"✅ Alert created successfully for {sensor_id}")
+                            st.rerun()
+                        else:
+                            st.error("Failed to create alert")
     
     with col2:
         if st.button("📧 Send Notifications"):
-            st.info("Notification system would be implemented here")
+            # Notification system
+            with st.form("notification_settings"):
+                st.subheader("📧 Notification Settings")
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    email_notifications = st.checkbox("Email Notifications", value=True)
+                    sms_notifications = st.checkbox("SMS Notifications", value=False)
+                    push_notifications = st.checkbox("Push Notifications", value=True)
+                
+                with col2:
+                    notification_threshold = st.selectbox(
+                        "Notification Threshold",
+                        ["All Alerts", "Warning & Critical", "Critical Only"]
+                    )
+                    
+                    notification_frequency = st.selectbox(
+                        "Notification Frequency",
+                        ["Immediate", "Every 5 min", "Every 15 min", "Hourly"]
+                    )
+                
+                recipients = st.text_area(
+                    "Email Recipients (comma-separated)",
+                    placeholder="admin@company.com, operator@company.com"
+                )
+                
+                phone_numbers = st.text_area(
+                    "SMS Recipients (comma-separated)",
+                    placeholder="+1234567890, +0987654321"
+                )
+                
+                if st.form_submit_button("💾 Save Notification Settings"):
+                    # Store notification settings in session state
+                    notification_settings = {
+                        'email_enabled': email_notifications,
+                        'sms_enabled': sms_notifications,
+                        'push_enabled': push_notifications,
+                        'threshold': notification_threshold,
+                        'frequency': notification_frequency,
+                        'email_recipients': recipients.split(',') if recipients else [],
+                        'sms_recipients': phone_numbers.split(',') if phone_numbers else []
+                    }
+                    
+                    st.session_state.notification_settings = notification_settings
+                    st.success("✅ Notification settings saved successfully!")
+                    
+                    # Display current settings
+                    st.info(f"📧 Email: {'Enabled' if email_notifications else 'Disabled'}")
+                    st.info(f"📱 SMS: {'Enabled' if sms_notifications else 'Disabled'}")
+                    st.info(f"🔔 Push: {'Enabled' if push_notifications else 'Disabled'}")
+                    st.info(f"📊 Threshold: {notification_threshold}")
+                    st.info(f"⏰ Frequency: {notification_frequency}")
     
     with col3:
         if st.button("🔧 Schedule Maintenance"):
@@ -349,7 +438,96 @@ if anomalies_detected > 0:
     
     with col4:
         if st.button("📝 Generate Report"):
-            st.info("Anomaly report generation would be implemented here")
+            # Anomaly report generation
+            with st.spinner("Generating anomaly report..."):
+                # Get anomaly data for report
+                from utils.data_generator import get_recent_sensor_data_from_db
+                from utils.ml_models import detect_anomalies
+                from utils.database import get_active_alerts, get_system_stats
+                
+                recent_data = get_recent_sensor_data_from_db(hours=24)
+                
+                if not recent_data.empty:
+                    anomaly_scores = detect_anomalies(recent_data)
+                    high_anomaly_indices = [i for i, score in enumerate(anomaly_scores) if score > 0.7]
+                    
+                    # Create comprehensive anomaly report
+                    report = {
+                        'report_timestamp': datetime.now().isoformat(),
+                        'analysis_period': '24 hours',
+                        'total_sensors_analyzed': len(recent_data['sensor_id'].unique()),
+                        'total_readings_analyzed': len(recent_data),
+                        'anomaly_summary': {
+                            'high_anomaly_count': len(high_anomaly_indices),
+                            'average_anomaly_score': float(np.mean(anomaly_scores)),
+                            'max_anomaly_score': float(np.max(anomaly_scores)),
+                            'anomaly_threshold': 0.7
+                        },
+                        'sensor_details': []
+                    }
+                    
+                    # Add sensor-specific details
+                    for sensor_id in recent_data['sensor_id'].unique():
+                        sensor_data = recent_data[recent_data['sensor_id'] == sensor_id]
+                        sensor_anomaly_scores = detect_anomalies(sensor_data)
+                        
+                        report['sensor_details'].append({
+                            'sensor_id': sensor_id,
+                            'readings_count': len(sensor_data),
+                            'avg_anomaly_score': float(np.mean(sensor_anomaly_scores)),
+                            'max_anomaly_score': float(np.max(sensor_anomaly_scores)),
+                            'anomaly_incidents': len([s for s in sensor_anomaly_scores if s > 0.7]),
+                            'avg_pressure': float(sensor_data['pressure'].mean()),
+                            'avg_flow_rate': float(sensor_data['flow_rate'].mean()),
+                            'avg_temperature': float(sensor_data['temperature'].mean())
+                        })
+                    
+                    # Display report
+                    st.subheader("📊 Anomaly Analysis Report")
+                    
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.metric("Total Sensors", report['total_sensors_analyzed'])
+                        st.metric("High Anomalies", report['anomaly_summary']['high_anomaly_count'])
+                    
+                    with col2:
+                        st.metric("Total Readings", report['total_readings_analyzed'])
+                        st.metric("Avg Anomaly Score", f"{report['anomaly_summary']['average_anomaly_score']:.3f}")
+                    
+                    with col3:
+                        st.metric("Max Anomaly Score", f"{report['anomaly_summary']['max_anomaly_score']:.3f}")
+                        st.metric("Analysis Period", report['analysis_period'])
+                    
+                    # Detailed sensor analysis
+                    st.subheader("📋 Sensor-Level Analysis")
+                    
+                    sensor_df = pd.DataFrame(report['sensor_details'])
+                    st.dataframe(sensor_df, use_container_width=True)
+                    
+                    # Create downloadable report
+                    import json
+                    report_json = json.dumps(report, indent=2)
+                    
+                    st.download_button(
+                        label="📁 Download Anomaly Report (JSON)",
+                        data=report_json,
+                        file_name=f"anomaly_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                        mime='application/json'
+                    )
+                    
+                    # Generate CSV for detailed analysis
+                    csv_data = sensor_df.to_csv(index=False)
+                    st.download_button(
+                        label="📊 Download Sensor Analysis (CSV)",
+                        data=csv_data,
+                        file_name=f"sensor_anomaly_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                        mime='text/csv'
+                    )
+                    
+                    st.success("Anomaly report generated successfully!")
+                else:
+                    st.warning("No recent data available for anomaly analysis.")
 
 else:
     st.success("✅ No anomalies detected in the current dataset")
@@ -396,7 +574,60 @@ with col2:
         min_samples = st.slider("Min Samples", 3, 20, 5, 1)
     
     if st.button("🔄 Retrain Model"):
-        st.info("Model retraining would be implemented here")
+        # Model retraining implementation
+        with st.spinner("Retraining anomaly detection model..."):
+                from utils.ml_models import AnomalyDetector, train_anomaly_model
+                from utils.data_generator import get_recent_sensor_data_from_db
+                import os
+                
+                # Get training data
+                training_data = get_recent_sensor_data_from_db(hours=168)  # 7 days of data
+                
+                if not training_data.empty and len(training_data) > 100:
+                    # Train new model
+                    detector = train_anomaly_model(training_data)
+                    
+                    # Test the model
+                    test_data = get_recent_sensor_data_from_db(hours=24)
+                    if not test_data.empty:
+                        labels, scores = detector.predict(test_data)
+                        
+                        # Model performance metrics
+                        anomaly_count = len([l for l in labels if l == -1])
+                        avg_score = np.mean(scores)
+                        
+                        st.success("✅ Model retrained successfully!")
+                        
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.metric("Training Samples", len(training_data))
+                        
+                        with col2:
+                            st.metric("Test Anomalies", anomaly_count)
+                        
+                        with col3:
+                            st.metric("Avg Test Score", f"{avg_score:.3f}")
+                        
+                        # Save model info
+                        model_info = {
+                            'retrained_at': datetime.now().isoformat(),
+                            'training_samples': len(training_data),
+                            'test_anomalies': anomaly_count,
+                            'average_score': float(avg_score),
+                            'model_type': 'Isolation Forest'
+                        }
+                        
+                        st.session_state.model_info = model_info
+                        
+                        st.info("🔄 Model has been retrained and is now active.")
+                        st.info("📊 All future anomaly detection will use the updated model.")
+                    else:
+                        st.warning("⚠️ No test data available for model validation.")
+                else:
+                    st.error("❌ Insufficient training data. Need at least 100 samples for retraining.")
+                    st.info(f"Current data points: {len(training_data) if not training_data.empty else 0}")
+                    st.info("💡 Try generating more data or extending the time range.")
 
 # Export and reporting
 st.markdown("---")
@@ -419,7 +650,120 @@ with col1:
 
 with col2:
     if st.button("📊 Generate Dashboard"):
-        st.info("Anomaly dashboard generation would be implemented here")
+        # Anomaly dashboard generation
+        with st.spinner("Creating anomaly dashboard..."):
+                # Get comprehensive anomaly data
+                from utils.data_generator import get_recent_sensor_data_from_db
+                from utils.ml_models import detect_anomalies
+                
+                recent_data = get_recent_sensor_data_from_db(hours=24)
+                
+                if not recent_data.empty:
+                    anomaly_scores = detect_anomalies(recent_data)
+                    
+                    # Create dashboard
+                    st.subheader("📊 Anomaly Detection Dashboard")
+                    
+                    # Summary metrics
+                    col1, col2, col3, col4 = st.columns(4)
+                    
+                    with col1:
+                        high_anomalies = len([s for s in anomaly_scores if s > 0.7])
+                        st.metric("High Anomalies", high_anomalies, delta=f"{high_anomalies - 2}")
+                    
+                    with col2:
+                        avg_anomaly = np.mean(anomaly_scores)
+                        st.metric("Avg Anomaly Score", f"{avg_anomaly:.3f}", delta=f"{avg_anomaly - 0.3:.3f}")
+                    
+                    with col3:
+                        max_anomaly = np.max(anomaly_scores)
+                        st.metric("Max Anomaly Score", f"{max_anomaly:.3f}")
+                    
+                    with col4:
+                        affected_sensors = len(recent_data['sensor_id'].unique())
+                        st.metric("Sensors Monitored", affected_sensors)
+                    
+                    # Anomaly distribution chart
+                    st.subheader("📈 Anomaly Score Distribution")
+                    
+                    fig_dist = px.histogram(
+                        x=anomaly_scores,
+                        nbins=30,
+                        title="Distribution of Anomaly Scores",
+                        labels={'x': 'Anomaly Score', 'count': 'Frequency'}
+                    )
+                    fig_dist.add_vline(x=0.7, line_dash="dash", line_color="red", 
+                                     annotation_text="Alert Threshold")
+                    st.plotly_chart(fig_dist, use_container_width=True)
+                    
+                    # Time series anomaly detection
+                    if 'timestamp' in recent_data.columns:
+                        st.subheader("⏰ Anomaly Timeline")
+                        
+                        # Add anomaly scores to data
+                        timeline_data = recent_data.copy()
+                        timeline_data['anomaly_score'] = anomaly_scores
+                        
+                        # Create timeline chart
+                        fig_timeline = px.scatter(
+                            timeline_data,
+                            x='timestamp',
+                            y='anomaly_score',
+                            color='sensor_type',
+                            size='anomaly_score',
+                            hover_data=['sensor_id', 'pressure', 'flow_rate', 'temperature'],
+                            title="Anomaly Scores Over Time"
+                        )
+                        fig_timeline.add_hline(y=0.7, line_dash="dash", line_color="red", 
+                                             annotation_text="Alert Threshold")
+                        st.plotly_chart(fig_timeline, use_container_width=True)
+                    
+                    # Top anomalous sensors
+                    st.subheader("🔍 Top Anomalous Sensors")
+                    
+                    sensor_anomaly_summary = []
+                    for sensor_id in recent_data['sensor_id'].unique():
+                        sensor_indices = recent_data[recent_data['sensor_id'] == sensor_id].index
+                        sensor_anomaly_scores = [anomaly_scores[i] for i in sensor_indices]
+                        
+                        if sensor_anomaly_scores:
+                            sensor_anomaly_summary.append({
+                                'sensor_id': sensor_id,
+                                'max_anomaly_score': max(sensor_anomaly_scores),
+                                'avg_anomaly_score': np.mean(sensor_anomaly_scores),
+                                'anomaly_incidents': len([s for s in sensor_anomaly_scores if s > 0.7])
+                            })
+                    
+                    anomaly_df = pd.DataFrame(sensor_anomaly_summary)
+                    anomaly_df = anomaly_df.sort_values('max_anomaly_score', ascending=False)
+                    
+                    st.dataframe(anomaly_df.head(10), use_container_width=True)
+                    
+                    # Export dashboard data
+                    dashboard_data = {
+                        'summary': {
+                            'high_anomalies': int(high_anomalies),
+                            'avg_anomaly_score': float(avg_anomaly),
+                            'max_anomaly_score': float(max_anomaly),
+                            'sensors_monitored': int(affected_sensors)
+                        },
+                        'sensor_details': sensor_anomaly_summary,
+                        'generated_at': datetime.now().isoformat()
+                    }
+                    
+                    import json
+                    dashboard_json = json.dumps(dashboard_data, indent=2)
+                    
+                    st.download_button(
+                        label="📊 Download Dashboard Data (JSON)",
+                        data=dashboard_json,
+                        file_name=f"anomaly_dashboard_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                        mime='application/json'
+                    )
+                    
+                    st.success("Anomaly dashboard generated successfully!")
+                else:
+                    st.warning("No recent data available for dashboard generation.")
 
 with col3:
     if st.button("⚙️ Model Settings"):

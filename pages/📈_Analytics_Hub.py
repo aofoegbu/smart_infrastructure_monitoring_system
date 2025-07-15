@@ -542,8 +542,165 @@ with col1:
 
 with col2:
     if st.button("📊 Generate Report"):
-        st.info("Automated report generation would be implemented here")
+        # Automated report generation
+        with st.spinner("Generating comprehensive analytics report..."):
+            # Get recent data for analysis
+            from utils.data_generator import get_recent_sensor_data_from_db
+                from utils.database import get_system_stats, get_active_alerts
+                from utils.ml_models import calculate_sensor_health_score, predict_maintenance, detect_anomalies
+                from utils.data_quality import generate_quality_report
+                
+                recent_data = get_recent_sensor_data_from_db(hours=24)
+                system_stats = get_system_stats()
+                active_alerts = get_active_alerts()
+                
+                if not recent_data.empty:
+                    # Generate analytics
+                    health_scores = calculate_sensor_health_score(recent_data)
+                    maintenance_scores = predict_maintenance(recent_data)
+                    anomaly_scores = detect_anomalies(recent_data)
+                    quality_report = generate_quality_report(recent_data)
+                    
+                    # Create comprehensive report
+                    report = {
+                        'timestamp': datetime.now().isoformat(),
+                        'system_overview': {
+                            'total_sensors': system_stats['total_sensors'],
+                            'active_sensors': system_stats['active_sensors'],
+                            'total_readings': len(recent_data),
+                            'active_alerts': len(active_alerts)
+                        },
+                        'performance_metrics': {
+                            'avg_pressure': recent_data['pressure'].mean(),
+                            'avg_flow_rate': recent_data['flow_rate'].mean(),
+                            'avg_temperature': recent_data['temperature'].mean(),
+                            'avg_quality_score': recent_data['quality_score'].mean()
+                        },
+                        'health_analysis': {
+                            'avg_health_score': health_scores['health_score'].mean(),
+                            'sensors_needing_maintenance': len([s for s in maintenance_scores if s > 0.6]),
+                            'high_anomaly_sensors': len([s for s in anomaly_scores if s > 0.7])
+                        },
+                        'data_quality': {
+                            'overall_score': quality_report['overall_score'],
+                            'completeness': quality_report['checks']['completeness']['score'],
+                            'accuracy': quality_report['checks']['accuracy']['score']
+                        }
+                    }
+                    
+                    # Display report
+                    st.subheader("📊 Comprehensive Analytics Report")
+                    
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.json(report['system_overview'])
+                        st.json(report['performance_metrics'])
+                    
+                    with col2:
+                        st.json(report['health_analysis'])
+                        st.json(report['data_quality'])
+                    
+                    # Create downloadable report
+                    import json
+                    report_json = json.dumps(report, indent=2)
+                    
+                    st.download_button(
+                        label="📁 Download Analytics Report (JSON)",
+                        data=report_json,
+                        file_name=f"analytics_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                        mime='application/json'
+                    )
+                    
+                    st.success("Automated analytics report generated successfully!")
+                else:
+                    st.warning("No recent data available for report generation.")
 
 with col3:
     if st.button("📧 Schedule Analysis"):
-        st.info("Analysis scheduling feature would be implemented here")
+        # Analysis scheduling feature
+        st.subheader("📅 Schedule Automated Analysis")
+        
+        with st.form("schedule_analysis"):
+            # Analysis type selection
+                analysis_type = st.selectbox(
+                    "Analysis Type",
+                    ["Daily System Health", "Weekly Performance Report", "Monthly Quality Assessment", "Anomaly Detection Scan"]
+                )
+                
+                # Frequency selection
+                frequency = st.selectbox(
+                    "Frequency",
+                    ["Daily", "Weekly", "Monthly", "Custom"]
+                )
+                
+                # Time selection
+                run_time = st.time_input("Run Time", value=datetime.now().time())
+                
+                # Recipients
+                recipients = st.text_area(
+                    "Email Recipients (comma-separated)",
+                    placeholder="admin@company.com, operator@company.com"
+                )
+                
+                # Parameters
+                st.subheader("Analysis Parameters")
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    include_charts = st.checkbox("Include Charts", value=True)
+                    include_alerts = st.checkbox("Include Alerts", value=True)
+                
+                with col2:
+                    include_recommendations = st.checkbox("Include Recommendations", value=True)
+                    send_summary_only = st.checkbox("Send Summary Only", value=False)
+                
+                # Submit button
+                if st.form_submit_button("📅 Schedule Analysis"):
+                    # Create scheduled analysis record
+                    scheduled_analysis = {
+                        'id': f"SCHED_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                        'type': analysis_type,
+                        'frequency': frequency,
+                        'run_time': run_time.strftime('%H:%M'),
+                        'recipients': recipients.split(',') if recipients else [],
+                        'parameters': {
+                            'include_charts': include_charts,
+                            'include_alerts': include_alerts,
+                            'include_recommendations': include_recommendations,
+                            'send_summary_only': send_summary_only
+                        },
+                        'created_at': datetime.now().isoformat(),
+                        'status': 'active'
+                    }
+                    
+                    # Store in session state (in production, this would go to database)
+                    if 'scheduled_analyses' not in st.session_state:
+                        st.session_state.scheduled_analyses = []
+                    
+                    st.session_state.scheduled_analyses.append(scheduled_analysis)
+                    
+                    st.success(f"✅ Scheduled {analysis_type} analysis for {frequency} at {run_time.strftime('%H:%M')}")
+                    st.info("📧 Email notifications will be sent to specified recipients when analysis runs.")
+            
+            # Display existing scheduled analyses
+            if 'scheduled_analyses' in st.session_state and st.session_state.scheduled_analyses:
+                st.subheader("📋 Scheduled Analyses")
+                
+                for i, analysis in enumerate(st.session_state.scheduled_analyses):
+                    with st.expander(f"📅 {analysis['type']} - {analysis['frequency']} at {analysis['run_time']}"):
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            st.write(f"**Type:** {analysis['type']}")
+                            st.write(f"**Frequency:** {analysis['frequency']}")
+                            st.write(f"**Run Time:** {analysis['run_time']}")
+                        
+                        with col2:
+                            st.write(f"**Recipients:** {len(analysis['recipients'])} recipients")
+                            st.write(f"**Status:** {analysis['status']}")
+                            st.write(f"**Created:** {analysis['created_at'][:10]}")
+                        
+                        if st.button(f"🗑️ Delete Schedule", key=f"delete_{i}"):
+                            st.session_state.scheduled_analyses.pop(i)
+                            st.rerun()

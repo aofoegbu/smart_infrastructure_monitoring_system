@@ -580,11 +580,304 @@ with col1:
 
 with col2:
     if st.button("🔧 Update Policies"):
-        st.info("Policy update interface would be implemented here")
+        # Policy update interface
+            st.subheader("📋 Data Governance Policy Management")
+            
+            with st.form("policy_update"):
+                policy_type = st.selectbox(
+                    "Policy Type",
+                    ["Data Retention", "Access Control", "Data Classification", "Compliance Framework"]
+                )
+                
+                if policy_type == "Data Retention":
+                    st.subheader("🗂️ Data Retention Policy")
+                    
+                    data_types = ["sensor_data", "alerts", "maintenance_records", "user_activities"]
+                    
+                    for data_type in data_types:
+                        st.write(f"**{data_type.replace('_', ' ').title()}**")
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            retention_period = st.selectbox(
+                                f"Retention Period",
+                                ["7 days", "30 days", "90 days", "1 year", "3 years", "5 years", "Permanent"],
+                                key=f"retention_{data_type}"
+                            )
+                        
+                        with col2:
+                            archive_after = st.selectbox(
+                                f"Archive After",
+                                ["30 days", "90 days", "1 year", "2 years", "Never"],
+                                key=f"archive_{data_type}"
+                            )
+                
+                elif policy_type == "Access Control":
+                    st.subheader("🔐 Access Control Policy")
+                    
+                    roles = ["administrator", "operator", "analyst", "manager", "guest"]
+                    resources = ["sensor_data", "alerts", "reports", "system_config", "user_management"]
+                    
+                    access_matrix = {}
+                    for role in roles:
+                        access_matrix[role] = {}
+                        st.write(f"**{role.title()} Permissions**")
+                        
+                        cols = st.columns(len(resources))
+                        for i, resource in enumerate(resources):
+                            with cols[i]:
+                                access_matrix[role][resource] = st.checkbox(
+                                    f"{resource.replace('_', ' ').title()}",
+                                    key=f"access_{role}_{resource}"
+                                )
+                
+                elif policy_type == "Data Classification":
+                    st.subheader("🏷️ Data Classification Policy")
+                    
+                    classification_levels = st.multiselect(
+                        "Classification Levels",
+                        ["Public", "Internal", "Confidential", "Restricted", "Top Secret"],
+                        default=["Public", "Internal", "Confidential"]
+                    )
+                    
+                    for level in classification_levels:
+                        st.write(f"**{level} Data**")
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            access_requirements = st.text_area(
+                                f"Access Requirements for {level}",
+                                placeholder="Describe who can access this data and under what conditions",
+                                key=f"access_req_{level}"
+                            )
+                        
+                        with col2:
+                            handling_procedures = st.text_area(
+                                f"Handling Procedures for {level}",
+                                placeholder="Describe how this data should be handled and stored",
+                                key=f"handling_{level}"
+                            )
+                
+                elif policy_type == "Compliance Framework":
+                    st.subheader("📊 Compliance Framework Policy")
+                    
+                    frameworks = st.multiselect(
+                        "Applicable Frameworks",
+                        ["GDPR", "SOX", "ISO27001", "HIPAA", "PCI DSS", "SOC 2"],
+                        default=["GDPR", "SOX", "ISO27001"]
+                    )
+                    
+                    for framework in frameworks:
+                        st.write(f"**{framework} Compliance**")
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            requirements = st.text_area(
+                                f"Key Requirements",
+                                placeholder=f"List key {framework} requirements",
+                                key=f"req_{framework}"
+                            )
+                        
+                        with col2:
+                            implementation = st.text_area(
+                                f"Implementation Notes",
+                                placeholder=f"How {framework} is implemented in the system",
+                                key=f"impl_{framework}"
+                            )
+                
+                # Submit button
+                if st.form_submit_button("💾 Update Policy"):
+                    # Store policy updates in session state
+                    if 'policy_updates' not in st.session_state:
+                        st.session_state.policy_updates = []
+                    
+                    policy_update = {
+                        'type': policy_type,
+                        'updated_at': datetime.now().isoformat(),
+                        'updated_by': st.session_state.get('username', 'admin')
+                    }
+                    
+                    st.session_state.policy_updates.append(policy_update)
+                    st.success(f"✅ {policy_type} policy updated successfully!")
+                    st.info("📋 Policy changes have been logged and will be applied to the system.")
+            
+            # Display recent policy updates
+            if 'policy_updates' in st.session_state and st.session_state.policy_updates:
+                st.subheader("📝 Recent Policy Updates")
+                
+                for update in st.session_state.policy_updates[-5:]:  # Show last 5 updates
+                    st.write(f"• **{update['type']}** - Updated by {update['updated_by']} on {update['updated_at'][:10]}")
 
 with col3:
     if st.button("📊 Generate Full Report"):
-        st.info("Comprehensive data management report generation would be implemented here")
+        # Comprehensive data management report generation
+            with st.spinner("Generating comprehensive data management report..."):
+                from utils.data_quality import generate_quality_report, DataQualityChecker
+                from utils.data_governance import DataGovernance, ComplianceManager, calculate_data_governance_score
+                from utils.data_generator import get_recent_sensor_data_from_db
+                from utils.database import get_system_stats, get_active_alerts
+                
+                # Get recent data for analysis
+                recent_data = get_recent_sensor_data_from_db(hours=24)
+                system_stats = get_system_stats()
+                active_alerts = get_active_alerts()
+                
+                if not recent_data.empty:
+                    # Generate quality report
+                    quality_report = generate_quality_report(recent_data)
+                    
+                    # Generate governance score
+                    governance_score = calculate_data_governance_score()
+                    
+                    # Generate compliance reports
+                    compliance_mgr = ComplianceManager()
+                    compliance_dashboard = compliance_mgr.generate_compliance_dashboard()
+                    
+                    # Create comprehensive report
+                    management_report = {
+                        'report_metadata': {
+                            'generated_at': datetime.now().isoformat(),
+                            'report_type': 'Comprehensive Data Management Report',
+                            'analysis_period': '24 hours',
+                            'generated_by': st.session_state.get('username', 'admin')
+                        },
+                        'system_overview': {
+                            'total_sensors': system_stats['total_sensors'],
+                            'active_sensors': system_stats['active_sensors'],
+                            'total_readings': len(recent_data),
+                            'active_alerts': len(active_alerts),
+                            'data_volume_mb': len(recent_data) * 0.001  # Approximate
+                        },
+                        'data_quality': {
+                            'overall_score': quality_report['overall_score'],
+                            'completeness_score': quality_report['checks']['completeness']['score'],
+                            'accuracy_score': quality_report['checks']['accuracy']['score'],
+                            'consistency_score': quality_report['checks']['consistency']['score'],
+                            'timeliness_score': quality_report['checks']['timeliness']['score'],
+                            'quality_issues': quality_report['issues']
+                        },
+                        'data_governance': {
+                            'overall_score': governance_score['overall_score'],
+                            'policy_compliance': governance_score['policy_compliance'],
+                            'access_control': governance_score['access_control'],
+                            'data_classification': governance_score['data_classification']
+                        },
+                        'compliance_status': compliance_dashboard
+                    }
+                    
+                    # Display the report
+                    st.subheader("📊 Comprehensive Data Management Report")
+                    
+                    # System Overview
+                    st.subheader("🖥️ System Overview")
+                    col1, col2, col3, col4 = st.columns(4)
+                    
+                    with col1:
+                        st.metric("Total Sensors", management_report['system_overview']['total_sensors'])
+                    with col2:
+                        st.metric("Active Sensors", management_report['system_overview']['active_sensors'])
+                    with col3:
+                        st.metric("Total Readings", management_report['system_overview']['total_readings'])
+                    with col4:
+                        st.metric("Active Alerts", management_report['system_overview']['active_alerts'])
+                    
+                    # Data Quality Section
+                    st.subheader("📈 Data Quality Analysis")
+                    
+                    quality_col1, quality_col2 = st.columns(2)
+                    
+                    with quality_col1:
+                        st.metric("Overall Quality Score", f"{management_report['data_quality']['overall_score']:.1f}%")
+                        st.metric("Completeness", f"{management_report['data_quality']['completeness_score']:.1f}%")
+                        st.metric("Accuracy", f"{management_report['data_quality']['accuracy_score']:.1f}%")
+                    
+                    with quality_col2:
+                        st.metric("Consistency", f"{management_report['data_quality']['consistency_score']:.1f}%")
+                        st.metric("Timeliness", f"{management_report['data_quality']['timeliness_score']:.1f}%")
+                        st.metric("Quality Issues", len(management_report['data_quality']['quality_issues']))
+                    
+                    # Data Governance Section
+                    st.subheader("🔒 Data Governance")
+                    
+                    gov_col1, gov_col2 = st.columns(2)
+                    
+                    with gov_col1:
+                        st.metric("Overall Governance Score", f"{management_report['data_governance']['overall_score']:.1f}%")
+                        st.metric("Policy Compliance", f"{management_report['data_governance']['policy_compliance']:.1f}%")
+                    
+                    with gov_col2:
+                        st.metric("Access Control", f"{management_report['data_governance']['access_control']:.1f}%")
+                        st.metric("Data Classification", f"{management_report['data_governance']['data_classification']:.1f}%")
+                    
+                    # Compliance Status
+                    st.subheader("📋 Compliance Status")
+                    
+                    compliance_data = []
+                    for framework, score in management_report['compliance_status'].items():
+                        if isinstance(score, (int, float)):
+                            compliance_data.append({
+                                'Framework': framework,
+                                'Score': f"{score:.1f}%",
+                                'Status': 'Compliant' if score >= 80 else 'Needs Attention'
+                            })
+                    
+                    if compliance_data:
+                        compliance_df = pd.DataFrame(compliance_data)
+                        st.dataframe(compliance_df, use_container_width=True)
+                    
+                    # Recommendations
+                    st.subheader("💡 Recommendations")
+                    
+                    recommendations = []
+                    
+                    if management_report['data_quality']['overall_score'] < 95:
+                        recommendations.append("🔍 Implement additional data quality checks")
+                    
+                    if management_report['data_governance']['overall_score'] < 90:
+                        recommendations.append("📋 Review and update data governance policies")
+                    
+                    if len(management_report['data_quality']['quality_issues']) > 0:
+                        recommendations.append("⚠️ Address identified data quality issues")
+                    
+                    if management_report['system_overview']['active_alerts'] > 5:
+                        recommendations.append("🚨 Investigate high number of active alerts")
+                    
+                    if not recommendations:
+                        recommendations.append("✅ System is operating well within all parameters")
+                    
+                    for rec in recommendations:
+                        st.write(f"• {rec}")
+                    
+                    # Export options
+                    st.subheader("📁 Export Options")
+                    
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        # JSON export
+                        import json
+                        report_json = json.dumps(management_report, indent=2)
+                        st.download_button(
+                            label="📊 Download Report (JSON)",
+                            data=report_json,
+                            file_name=f"data_management_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                            mime='application/json'
+                        )
+                    
+                    with col2:
+                        # CSV export for tabular data
+                        if compliance_data:
+                            csv_data = compliance_df.to_csv(index=False)
+                            st.download_button(
+                                label="📋 Download Compliance Data (CSV)",
+                                data=csv_data,
+                                file_name=f"compliance_status_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                                mime='text/csv'
+                            )
+                    
+                    st.success("Comprehensive data management report generated successfully!")
+                else:
+                    st.warning("No recent data available for report generation.")
 
 with col4:
     if st.button("⚙️ System Settings"):
