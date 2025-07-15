@@ -239,8 +239,8 @@ async def get_sensor_data(
 async def create_sensor_data(
     sensor_id: str,
     data: SensorDataCreate,
-    token: str = Query(..., description="JWT token"),
     background_tasks: BackgroundTasks,
+    token: str = Query(..., description="JWT token"),
     db: Session = Depends(get_db)
 ):
     user = await verify_token(token)

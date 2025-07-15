@@ -322,3 +322,10 @@ def session_timeout_check(timeout_minutes=60):
             st.warning("Session expired. Please log in again.")
             logout()
             st.rerun()
+
+def get_user_permissions(username):
+    """Get user permissions for a given username"""
+    users = get_users()
+    if username in users:
+        return users[username].get('permissions', [])
+    return []

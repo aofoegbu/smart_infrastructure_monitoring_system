@@ -439,3 +439,19 @@ def calculate_data_governance_score() -> Dict:
             'Enhance data quality checks'
         ]
     }
+
+# Helper functions for external use
+governance = DataGovernance()
+catalog = DataCatalog()
+
+def get_governance_policies():
+    """Get all governance policies"""
+    return governance.policies
+
+def check_compliance():
+    """Check overall compliance status"""
+    return governance.generate_compliance_report()
+
+def get_retention_policy():
+    """Get data retention policies"""
+    return governance.policies.get('data_retention', {})

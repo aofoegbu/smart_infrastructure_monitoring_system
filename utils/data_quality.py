@@ -402,6 +402,29 @@ class DataQualityChecker:
         
         return suggestions
 
+def check_data_completeness(data):
+    """
+    Check completeness of sensor data
+    Returns percentage of non-null values for each column
+    """
+    if data.empty:
+        return {'score': 0, 'details': 'No data available'}
+    
+    completeness = {}
+    for column in data.columns:
+        non_null_count = data[column].notna().sum()
+        total_count = len(data)
+        completeness[column] = (non_null_count / total_count) * 100
+    
+    overall_score = sum(completeness.values()) / len(completeness)
+    
+    return {
+        'score': overall_score,
+        'column_scores': completeness,
+        'total_records': len(data),
+        'complete_records': sum(1 for _, row in data.iterrows() if row.notna().all())
+    }
+
 def generate_quality_report(data: pd.DataFrame) -> Dict:
     """
     Generate a comprehensive data quality report

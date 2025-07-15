@@ -560,9 +560,9 @@ with col2:
                 maintenance_scores = predict_maintenance(recent_data)
                 anomaly_scores = detect_anomalies(recent_data)
                 quality_report = generate_quality_report(recent_data)
-                    
-                    # Create comprehensive report
-                    report = {
+                
+                # Create comprehensive report
+                report = {
                         'timestamp': datetime.now().isoformat(),
                         'system_overview': {
                             'total_sensors': system_stats['total_sensors'],
@@ -587,11 +587,11 @@ with col2:
                             'accuracy': quality_report['checks']['accuracy']['score']
                         }
                     }
-                    
-                    # Display report
-                    st.subheader("📊 Comprehensive Analytics Report")
-                    
-                    col1, col2 = st.columns(2)
+                
+                # Display report
+                st.subheader("📊 Comprehensive Analytics Report")
+                
+                col1, col2 = st.columns(2)
                     
                     with col1:
                         st.json(report['system_overview'])

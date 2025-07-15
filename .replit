@@ -24,6 +24,10 @@ args = "Streamlit Server"
 task = "workflow.run"
 args = "Auth Service"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Data Service"
+
 [[workflows.workflow]]
 name = "Streamlit Server"
 author = "agent"
@@ -41,6 +45,15 @@ author = "agent"
 task = "shell.exec"
 args = "cd services && python auth_service.py"
 waitForPort = 8001
+
+[[workflows.workflow]]
+name = "Data Service"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd services && python data_service.py"
+waitForPort = 8002
 
 [[ports]]
 localPort = 5000
