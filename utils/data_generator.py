@@ -3,6 +3,7 @@ import numpy as np
 from datetime import datetime, timedelta
 import random
 import os
+from .database import get_sensors, get_sensor_readings, store_sensor_reading, get_infrastructure_assets
 
 def generate_real_time_data(num_sensors=50):
     """
@@ -145,15 +146,22 @@ def generate_historical_data(hours=24, sensors_count=50):
 
 def load_sensor_metadata():
     """
-    Load sensor metadata from CSV file
+    Load sensor metadata from database
     """
     try:
-        if os.path.exists('data/sensors.csv'):
-            return pd.read_csv('data/sensors.csv')
+        # Try to load from database first
+        sensors_df = get_sensors()
+        if not sensors_df.empty:
+            return sensors_df
         else:
-            # Generate default metadata if file doesn't exist
-            return generate_sensor_metadata()
-    except Exception:
+            # Fallback to CSV file if database is empty
+            if os.path.exists('data/sensors.csv'):
+                return pd.read_csv('data/sensors.csv')
+            else:
+                # Generate if neither database nor file exists
+                return generate_sensor_metadata()
+    except Exception as e:
+        print(f"Error loading sensor metadata: {e}")
         return generate_sensor_metadata()
 
 def generate_sensor_metadata():
@@ -186,14 +194,22 @@ def generate_sensor_metadata():
 
 def load_infrastructure_assets():
     """
-    Load infrastructure assets data
+    Load infrastructure assets data from database
     """
     try:
-        if os.path.exists('data/infrastructure_assets.csv'):
-            return pd.read_csv('data/infrastructure_assets.csv')
+        # Try to load from database first
+        assets_df = get_infrastructure_assets()
+        if not assets_df.empty:
+            return assets_df
         else:
-            return generate_infrastructure_assets()
-    except Exception:
+            # Fallback to CSV file if database is empty
+            if os.path.exists('data/infrastructure_assets.csv'):
+                return pd.read_csv('data/infrastructure_assets.csv')
+            else:
+                # Generate if neither database nor file exists
+                return generate_infrastructure_assets()
+    except Exception as e:
+        print(f"Error loading infrastructure assets: {e}")
         return generate_infrastructure_assets()
 
 def generate_infrastructure_assets():
@@ -225,6 +241,123 @@ def generate_infrastructure_assets():
         })
     
     return pd.DataFrame(assets)
+
+def generate_and_store_real_time_data(num_sensors=10):
+    """
+    Generate real-time sensor data and store it to database
+    """
+    try:
+        # Load sensor metadata from database
+        sensors_metadata = load_sensor_metadata()
+        
+        if sensors_metadata.empty:
+            print("No sensors found in database")
+            return pd.DataFrame()
+        
+        # Select random sensors for this batch
+        available_sensors = len(sensors_metadata)
+        num_sensors = min(num_sensors, available_sensors)
+        selected_sensors = sensors_metadata.sample(n=num_sensors) if num_sensors < available_sensors else sensors_metadata
+        
+        current_time = datetime.now()
+        stored_count = 0
+        
+        for _, sensor in selected_sensors.iterrows():
+            # Generate realistic values based on sensor type and time of day
+            hour = current_time.hour
+            base_values = {
+                'pressure': 45 + 15 * np.sin(hour * np.pi / 12),
+                'flow': 25 + 10 * np.sin(hour * np.pi / 12),
+                'temperature': 20 + 8 * np.sin((hour - 6) * np.pi / 12),
+                'quality': 8.5 + 1.5 * np.random.normal(0, 0.1)
+            }
+            
+            # Add sensor-specific variations
+            pressure = base_values['pressure'] + np.random.normal(0, 2)
+            flow_rate = base_values['flow'] + np.random.normal(0, 3)
+            temperature = base_values['temperature'] + np.random.normal(0, 1.5)
+            quality_score = max(0, min(10, base_values['quality'] + np.random.normal(0, 0.5)))
+            
+            # Ensure realistic bounds
+            pressure = max(0, pressure)
+            flow_rate = max(0, flow_rate)
+            
+            # Generate anomaly detection scores
+            anomaly_score = 0.0
+            is_anomaly = False
+            
+            # 3% chance of anomaly
+            if random.random() < 0.03:
+                anomaly_score = np.random.uniform(0.7, 1.0)
+                is_anomaly = True
+                # Create anomalous readings
+                if sensor['sensor_type'] == 'pressure':
+                    pressure *= np.random.choice([0.3, 2.5])
+                elif sensor['sensor_type'] == 'flow':
+                    flow_rate *= np.random.choice([0.2, 3.0])
+                elif sensor['sensor_type'] == 'temperature':
+                    temperature += np.random.choice([-15, 25])
+                elif sensor['sensor_type'] == 'quality':
+                    quality_score *= np.random.uniform(0.3, 0.7)
+            else:
+                anomaly_score = np.random.uniform(0.0, 0.4)
+            
+            # Add some correlation between parameters for realism
+            if pressure > 60:
+                flow_rate *= 1.2
+                temperature += 2
+            elif pressure < 20:
+                flow_rate *= 0.8
+            
+            reading_data = {
+                'timestamp': current_time,
+                'pressure': float(round(pressure, 2)),
+                'flow_rate': float(round(flow_rate, 2)),
+                'temperature': float(round(temperature, 2)),
+                'quality_score': float(round(quality_score, 1)),
+                'anomaly_score': float(round(anomaly_score, 3)),
+                'is_anomaly': bool(is_anomaly)
+            }
+            
+            # Store to database
+            if store_sensor_reading(sensor['sensor_id'], reading_data):
+                stored_count += 1
+        
+        print(f"Stored {stored_count} sensor readings to database")
+        return True
+        
+    except Exception as e:
+        print(f"Error generating and storing real-time data: {e}")
+        return False
+
+def get_recent_sensor_data_from_db(hours=1, limit=100):
+    """
+    Get recent sensor data from database
+    """
+    try:
+        # Get sensor readings from database
+        readings_df = get_sensor_readings(hours=hours)
+        
+        if readings_df.empty:
+            return pd.DataFrame()
+        
+        # Get sensor metadata
+        sensors_df = get_sensors()
+        
+        # Merge readings with sensor metadata
+        if not sensors_df.empty:
+            merged_df = readings_df.merge(
+                sensors_df[['sensor_id', 'sensor_type', 'location', 'latitude', 'longitude', 'status', 'manufacturer', 'model']], 
+                on='sensor_id', 
+                how='left'
+            )
+            return merged_df.head(limit)
+        
+        return readings_df.head(limit)
+        
+    except Exception as e:
+        print(f"Error getting recent sensor data: {e}")
+        return pd.DataFrame()
 
 def simulate_sensor_failure(sensor_data, failure_rate=0.02):
     """

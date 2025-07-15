@@ -110,14 +110,28 @@ Preferred communication style: Simple, everyday language.
 - **Platform**: Streamlit application (suitable for Replit deployment)
 - **Architecture**: Single-application deployment with modular components
 - **Session Management**: Streamlit session state for user authentication
-- **Data Storage**: In-memory data generation (simulated sensors)
+- **Data Storage**: PostgreSQL database with comprehensive data models
+- **Database Integration**: Full CRUD operations with SQLAlchemy ORM
+
+### Database Architecture
+- **Database**: PostgreSQL with SQLAlchemy ORM
+- **Tables**: 
+  - sensors (metadata and configuration)
+  - sensor_readings (real-time data storage)
+  - infrastructure_assets (physical infrastructure)
+  - alerts (system notifications)
+  - users (authentication and roles)
+  - user_activities (audit trail)
+  - data_quality_checks (quality monitoring)
+  - maintenance_records (maintenance tracking)
+- **Features**: Automatic data persistence, real-time storage, historical analysis
 
 ### Production Considerations
-- **Database**: System designed to integrate with PostgreSQL for persistent storage
+- **Database**: PostgreSQL database fully integrated and operational
 - **Scalability**: Microservices architecture ready (as per project requirements)
 - **Cloud Deployment**: Compatible with cloud platforms (AWS, GCP, Azure)
 - **Container Support**: Docker-ready structure
-- **Real-time Processing**: Kafka/MQTT integration capability for live sensor feeds
+- **Real-time Processing**: Database-backed real-time data processing
 
 ### Security Features
 - Role-based access control with four user levels
