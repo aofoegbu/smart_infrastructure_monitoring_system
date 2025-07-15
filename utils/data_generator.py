@@ -415,3 +415,10 @@ def generate_maintenance_data():
         })
     
     return pd.DataFrame(records)
+
+def generate_sensor_data(num_sensors=50, hours=24):
+    """
+    Generate sensor data for testing and demos
+    This function is used by test scripts and other modules
+    """
+    return generate_historical_data(hours=hours, sensors_count=num_sensors)

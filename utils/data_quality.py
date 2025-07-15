@@ -425,6 +425,13 @@ def check_data_completeness(data):
         'complete_records': sum(1 for _, row in data.iterrows() if row.notna().all())
     }
 
+def check_data_accuracy(data):
+    """
+    Check data accuracy based on value ranges
+    """
+    checker = DataQualityChecker()
+    return checker.check_accuracy(data)
+
 def generate_quality_report(data: pd.DataFrame) -> Dict:
     """
     Generate a comprehensive data quality report

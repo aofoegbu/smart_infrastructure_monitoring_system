@@ -52,7 +52,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd services && python data_service.py"
+args = "cd services && python data_service_standalone.py"
 waitForPort = 8002
 
 [[ports]]
@@ -62,3 +62,7 @@ externalPort = 80
 [[ports]]
 localPort = 8001
 externalPort = 3000
+
+[[ports]]
+localPort = 8002
+externalPort = 3001

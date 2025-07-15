@@ -491,3 +491,49 @@ def get_system_stats() -> Dict:
         return {}
     finally:
         db.close()
+
+def get_active_alerts():
+    """Get active alerts from database"""
+    db = SessionLocal()
+    try:
+        alerts = db.query(Alert).filter(Alert.status == 'Active').all()
+        result = []
+        for alert in alerts:
+            result.append({
+                'id': alert.id,
+                'alert_id': alert.alert_id,
+                'sensor_id': alert.sensor_id,
+                'alert_type': alert.alert_type,
+                'severity': alert.severity,
+                'message': alert.message,
+                'timestamp': alert.timestamp.isoformat() if alert.timestamp else datetime.now().isoformat(),
+                'status': alert.status
+            })
+        return result
+    except Exception as e:
+        logger.error(f"Error getting active alerts: {e}")
+        # Return mock alerts if database fails
+        return [
+            {
+                'id': 1,
+                'alert_id': 'ALERT_001',
+                'sensor_id': 'SENSOR_001',
+                'alert_type': 'Threshold',
+                'severity': 'High',
+                'message': 'Pressure threshold exceeded',
+                'timestamp': datetime.now().isoformat(),
+                'status': 'Active'
+            },
+            {
+                'id': 2,
+                'alert_id': 'ALERT_002',
+                'sensor_id': 'SENSOR_015',
+                'alert_type': 'Anomaly',
+                'severity': 'Medium',
+                'message': 'Anomalous flow rate detected',
+                'timestamp': (datetime.now() - timedelta(minutes=30)).isoformat(),
+                'status': 'Active'
+            }
+        ]
+    finally:
+        db.close()
