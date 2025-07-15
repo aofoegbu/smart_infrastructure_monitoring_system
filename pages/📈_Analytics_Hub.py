@@ -592,29 +592,29 @@ with col2:
                 st.subheader("📊 Comprehensive Analytics Report")
                 
                 col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        st.json(report['system_overview'])
-                        st.json(report['performance_metrics'])
-                    
-                    with col2:
-                        st.json(report['health_analysis'])
-                        st.json(report['data_quality'])
-                    
-                    # Create downloadable report
-                    import json
-                    report_json = json.dumps(report, indent=2)
-                    
-                    st.download_button(
-                        label="📁 Download Analytics Report (JSON)",
-                        data=report_json,
-                        file_name=f"analytics_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                        mime='application/json'
-                    )
-                    
-                    st.success("Automated analytics report generated successfully!")
-                else:
-                    st.warning("No recent data available for report generation.")
+                
+                with col1:
+                    st.json(report['system_overview'])
+                    st.json(report['performance_metrics'])
+                
+                with col2:
+                    st.json(report['health_analysis'])
+                    st.json(report['data_quality'])
+                
+                # Create downloadable report
+                import json
+                report_json = json.dumps(report, indent=2)
+                
+                st.download_button(
+                    label="📁 Download Analytics Report (JSON)",
+                    data=report_json,
+                    file_name=f"analytics_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                    mime='application/json'
+                )
+                
+                st.success("Automated analytics report generated successfully!")
+            else:
+                st.warning("No recent data available for report generation.")
 
 with col3:
     if st.button("📧 Schedule Analysis"):
@@ -623,41 +623,41 @@ with col3:
         
         with st.form("schedule_analysis"):
             # Analysis type selection
-                analysis_type = st.selectbox(
-                    "Analysis Type",
-                    ["Daily System Health", "Weekly Performance Report", "Monthly Quality Assessment", "Anomaly Detection Scan"]
-                )
+            analysis_type = st.selectbox(
+                "Analysis Type",
+                ["Daily System Health", "Weekly Performance Report", "Monthly Quality Assessment", "Anomaly Detection Scan"]
+            )
                 
-                # Frequency selection
-                frequency = st.selectbox(
-                    "Frequency",
-                    ["Daily", "Weekly", "Monthly", "Custom"]
-                )
-                
-                # Time selection
-                run_time = st.time_input("Run Time", value=datetime.now().time())
-                
-                # Recipients
-                recipients = st.text_area(
-                    "Email Recipients (comma-separated)",
-                    placeholder="admin@company.com, operator@company.com"
-                )
-                
-                # Parameters
-                st.subheader("Analysis Parameters")
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    include_charts = st.checkbox("Include Charts", value=True)
-                    include_alerts = st.checkbox("Include Alerts", value=True)
-                
-                with col2:
-                    include_recommendations = st.checkbox("Include Recommendations", value=True)
-                    send_summary_only = st.checkbox("Send Summary Only", value=False)
-                
-                # Submit button
-                if st.form_submit_button("📅 Schedule Analysis"):
-                    # Create scheduled analysis record
+            # Frequency selection
+            frequency = st.selectbox(
+                "Frequency",
+                ["Daily", "Weekly", "Monthly", "Custom"]
+            )
+            
+            # Time selection
+            run_time = st.time_input("Run Time", value=datetime.now().time())
+            
+            # Recipients
+            recipients = st.text_area(
+                "Email Recipients (comma-separated)",
+                placeholder="admin@company.com, operator@company.com"
+            )
+            
+            # Parameters
+            st.subheader("Analysis Parameters")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                include_charts = st.checkbox("Include Charts", value=True)
+                include_alerts = st.checkbox("Include Alerts", value=True)
+            
+            with col2:
+                include_recommendations = st.checkbox("Include Recommendations", value=True)
+                send_summary_only = st.checkbox("Send Summary Only", value=False)
+            
+            # Submit button
+            if st.form_submit_button("📅 Schedule Analysis"):
+                # Create scheduled analysis record
                     scheduled_analysis = {
                         'id': f"SCHED_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
                         'type': analysis_type,
