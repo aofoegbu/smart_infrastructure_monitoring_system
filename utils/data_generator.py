@@ -83,7 +83,7 @@ def generate_historical_data(hours=24, sensors_count=50):
     # Create time series
     end_time = datetime.now()
     start_time = end_time - timedelta(hours=hours)
-    time_points = pd.date_range(start=start_time, end=end_time, freq='15T')  # 15-minute intervals
+    time_points = pd.date_range(start=start_time, end=end_time, freq='15min')  # 15-minute intervals
     
     data = []
     

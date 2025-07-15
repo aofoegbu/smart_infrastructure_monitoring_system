@@ -119,18 +119,20 @@ with tab2:
         st.plotly_chart(fig_temp, use_container_width=True)
     
     with col2:
-        # Temperature heatmap by location
+        # Temperature scatter map by location
         temp_by_location = sensor_data.groupby(['latitude', 'longitude'])['temperature'].mean().reset_index()
-        fig_heatmap = px.density_mapbox(
+        fig_heatmap = px.scatter_mapbox(
             temp_by_location,
             lat='latitude',
             lon='longitude',
-            z='temperature',
-            radius=10,
-            center=dict(lat=temp_by_location['latitude'].mean(), lon=temp_by_location['longitude'].mean()),
+            color='temperature',
+            size='temperature',
+            hover_data=['temperature'],
+            color_continuous_scale='RdYlBu_r',
+            size_max=15,
             zoom=10,
             mapbox_style="open-street-map",
-            title="Temperature Heatmap"
+            title="Temperature Distribution Map"
         )
         fig_heatmap.update_layout(height=400)
         st.plotly_chart(fig_heatmap, use_container_width=True)
