@@ -2,7 +2,7 @@ modules = ["python-3.11"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["glibcLocales", "libxcrypt", "pkg-config", "xsimd"]
+packages = ["bash", "c-ares", "glibcLocales", "grpc", "libxcrypt", "openssl", "pkg-config", "xsimd", "zlib"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -20,6 +20,10 @@ author = "agent"
 task = "workflow.run"
 args = "Streamlit Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Auth Service"
+
 [[workflows.workflow]]
 name = "Streamlit Server"
 author = "agent"
@@ -29,6 +33,19 @@ task = "shell.exec"
 args = "streamlit run app.py --server.port 5000"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "Auth Service"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd services && python auth_service.py"
+waitForPort = 8001
+
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 8001
+externalPort = 3000

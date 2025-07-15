@@ -1,0 +1,233 @@
+version: '3.8'
+
+services:
+  # Infrastructure Services
+  postgres:
+    image: postgres:15
+    container_name: sims_postgres
+    environment:
+      POSTGRES_DB: sims
+      POSTGRES_USER: sims_user
+      POSTGRES_PASSWORD: sims_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - sims_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: sims_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - sims_network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: sims_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - sims_network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: sims_kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    ports:
+      - "29092:29092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - sims_network
+
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: sims_mqtt
+    volumes:
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    networks:
+      - sims_network
+
+  # SIMS Microservices
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.auth
+    container_name: sims_auth_service
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DATABASE_URL: postgresql://sims_user:sims_password@postgres:5432/sims
+      JWT_SECRET_KEY: your-jwt-secret-key-here
+      REDIS_HOST: redis
+    ports:
+      - "8001:8001"
+    networks:
+      - sims_network
+
+  data-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.data
+    container_name: sims_data_service
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+      - auth-service
+    environment:
+      DATABASE_URL: postgresql://sims_user:sims_password@postgres:5432/sims
+      AUTH_SERVICE_URL: http://auth-service:8001
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+    ports:
+      - "8002:8002"
+    networks:
+      - sims_network
+
+  ml-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.ml
+    container_name: sims_ml_service
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+      - auth-service
+      - data-service
+    environment:
+      DATABASE_URL: postgresql://sims_user:sims_password@postgres:5432/sims
+      AUTH_SERVICE_URL: http://auth-service:8001
+      DATA_SERVICE_URL: http://data-service:8002
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+    ports:
+      - "8003:8003"
+    volumes:
+      - ml_models:/app/models
+    networks:
+      - sims_network
+
+  streaming-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.streaming
+    container_name: sims_streaming_service
+    depends_on:
+      - redis
+      - kafka
+      - mqtt
+      - auth-service
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+      MQTT_BROKER: mqtt
+      AUTH_SERVICE_URL: http://auth-service:8001
+    ports:
+      - "8004:8004"
+    networks:
+      - sims_network
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.gateway
+    container_name: sims_gateway_service
+    depends_on:
+      - auth-service
+      - data-service
+      - ml-service
+      - streaming-service
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8001
+      DATA_SERVICE_URL: http://data-service:8002
+      ML_SERVICE_URL: http://ml-service:8003
+      STREAMING_SERVICE_URL: http://streaming-service:8004
+      REDIS_HOST: redis
+    ports:
+      - "8000:8000"
+    networks:
+      - sims_network
+
+  # Streamlit Frontend
+  streamlit-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    container_name: sims_streamlit_app
+    depends_on:
+      - gateway-service
+    environment:
+      API_GATEWAY_URL: http://gateway-service:8000
+      DATABASE_URL: postgresql://sims_user:sims_password@postgres:5432/sims
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./:/app
+    networks:
+      - sims_network
+
+  # Monitoring and Observability
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sims_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - sims_network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sims_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    networks:
+      - sims_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  kafka_data:
+  ml_models:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  sims_network:
+    driver: bridge

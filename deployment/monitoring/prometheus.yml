@@ -1,0 +1,67 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "rules/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # SIMS Services
+  - job_name: 'sims-gateway'
+    metrics_path: '/gateway/prometheus'
+    static_configs:
+      - targets: ['gateway-service:8000']
+
+  - job_name: 'sims-auth'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['auth-service:8001']
+
+  - job_name: 'sims-data'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['data-service:8002']
+
+  - job_name: 'sims-ml'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['ml-service:8003']
+
+  - job_name: 'sims-streaming'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['streaming-service:8004']
+
+  - job_name: 'sims-llm'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['llm-service:8005']
+
+  # Infrastructure
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka:9092']
+
+  # Node Exporter for system metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']

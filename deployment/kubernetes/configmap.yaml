@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sims-config
+  namespace: sims
+data:
+  postgres.host: "postgres-service"
+  postgres.port: "5432"
+  postgres.database: "sims"
+  redis.host: "redis-service"
+  redis.port: "6379"
+  kafka.bootstrap.servers: "kafka-service:9092"
+  mqtt.broker: "mqtt-service"
+  mqtt.port: "1883"
+  auth.service.url: "http://auth-service:8001"
+  data.service.url: "http://data-service:8002"
+  ml.service.url: "http://ml-service:8003"
+  streaming.service.url: "http://streaming-service:8004"
+  gateway.service.url: "http://gateway-service:8000"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sims-secrets
+  namespace: sims
+type: Opaque
+data:
+  postgres-username: c2ltc191c2Vy  # sims_user
+  postgres-password: c2ltc19wYXNzd29yZA==  # sims_password
+  jwt-secret-key: eW91ci1qd3Qtc2VjcmV0LWtleS1oZXJl  # your-jwt-secret-key-here
+  redis-password: ""
