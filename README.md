@@ -11,55 +11,6 @@ https://smart-infra-monitor-augustineogelo.replit.app/Home
 
 ![Smart Infrastructure Monitoring System](screenshots/monitoring_system.png)
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Python 3.11+
-- PostgreSQL 14+
-- Docker & Docker Compose (optional)
-
-### Local Development
-```bash
-# Clone the repository
-git clone <repository-url>
-cd sims-enterprise
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up environment variables
-export DATABASE_URL="postgresql://user:password@localhost:5432/sims"
-
-# Initialize database
-python init_database.py
-
-# Start the application
-streamlit run app.py --server.port 5000
-```
-
-### Docker Deployment
-```bash
-# Start all services
-docker-compose up -d
-
-# Access the application
-open http://localhost:5000
-```
-
-## 🏗️ Architecture
-
-### Microservices Overview
-- **Authentication Service** (Port 8001): OAuth2/JWT authentication and authorization
-- **Data Service** (Port 8002): REST API for data operations and analytics
-- **ML Service** (Port 8003): Machine learning models and anomaly detection
-- **Streaming Service** (Port 8004): Real-time data streaming with Kafka/MQTT
-- **Gateway Service** (Port 8000): API gateway with load balancing and routing
-- **LLM Assistant** (Port 8005): Natural language query processing
-
-### Frontend Application
-- **Streamlit Multi-page App** (Port 5000): Interactive web dashboard
-- **7 Core Pages**: Dashboard, Infrastructure Map, Analytics, Anomaly Detection, Data Management, System Health, Home
-
 ## 📊 Features
 
 ### Core Monitoring
@@ -125,6 +76,56 @@ open http://localhost:5000
 - **Database Security**: Connection pooling and query validation
 - **API Security**: Rate limiting and request validation
 - **Compliance**: GDPR, SOX, ISO27001, HIPAA support
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.11+
+- PostgreSQL 14+
+- Docker & Docker Compose (optional)
+
+### Local Development
+```bash
+# Clone the repository
+git clone <repository-url>
+cd sims-enterprise
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment variables
+export DATABASE_URL="postgresql://user:password@localhost:5432/sims"
+
+# Initialize database
+python init_database.py
+
+# Start the application
+streamlit run app.py --server.port 5000
+```
+
+### Docker Deployment
+```bash
+# Start all services
+docker-compose up -d
+
+# Access the application
+open http://localhost:5000
+```
+
+## 🏗️ Architecture
+
+### Microservices Overview
+- **Authentication Service** (Port 8001): OAuth2/JWT authentication and authorization
+- **Data Service** (Port 8002): REST API for data operations and analytics
+- **ML Service** (Port 8003): Machine learning models and anomaly detection
+- **Streaming Service** (Port 8004): Real-time data streaming with Kafka/MQTT
+- **Gateway Service** (Port 8000): API gateway with load balancing and routing
+- **LLM Assistant** (Port 8005): Natural language query processing
+
+### Frontend Application
+- **Streamlit Multi-page App** (Port 5000): Interactive web dashboard
+- **7 Core Pages**: Dashboard, Infrastructure Map, Analytics, Anomaly Detection, Data Management, System Health, Home
+
 
 ## 📈 Performance
 
