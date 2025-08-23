@@ -7,7 +7,7 @@
 
 A comprehensive enterprise-grade Smart Infrastructure Monitoring System built with Python, featuring real-time sensor monitoring, AI-powered anomaly detection, and advanced data governance for utility networks.
 
-https://smart-infra-monitor-augustineogelo.replit.app/Home
+https://sims.ogelollm.app/Home
 
 ![Smart Infrastructure Monitoring System](screenshots/monitoring_system.png)
 
@@ -145,10 +145,9 @@ open http://localhost:5000
 
 ### Production Deployment Options
 
-#### Option 1: Replit Deployments (Recommended)
+#### Option 1: Web Deployment (Recommended)
 ```bash
-# Deploy directly from Replit
-# Cost: $25-45/month
+# Deploy locally
 # Features: Auto-scaling, SSL, monitoring
 ```
 
@@ -287,4 +286,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **SIMS Enterprise** - Powering the future of infrastructure monitoring with AI-driven insights and enterprise-grade reliability.
 
-*Built with ❤️ for infrastructure teams worldwide*
